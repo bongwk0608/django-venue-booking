@@ -1,32 +1,75 @@
-# SpaceFlow Booking Website
+# SpaceFlow – Venue Booking System
 
-Simple Django-based room booking website with:
+## 🚀 Overview
 
-- User pages: home, room list, room detail, booking form, booking confirmation, about
-- Admin pages: Django Admin login, dashboard, room management, booking management
-- Booking conflict validation for occupied time slots
+SpaceFlow is a Django-based venue booking system that allows users to browse rooms and make reservations with conflict validation.
 
-## Run locally
+This project is fully containerized using Docker, ensuring consistent development and deployment environments.
 
-1. Install dependencies:
-   `python3 -m pip install -r requirements.txt`
-2. Apply migrations:
-   `python3 manage.py migrate`
-3. Create an admin user:
-   `python3 manage.py createsuperuser`
-4. Optional demo data:
-   `python3 manage.py loaddata booking/fixtures/demo_rooms.json`
-5. Start the server:
-   `python3 manage.py runserver`
+---
 
-## Admin pages
+## ✨ Features
 
-- Admin login: `/admin/`
-- Room management: `Room` model in Django Admin
-- Booking management: `Booking` model in Django Admin
+* Browse available rooms
+* View detailed room information
+* Book rooms with date/time selection
+* Prevent booking conflicts
+* Admin dashboard for managing rooms and bookings
 
-## Notes
+---
 
-- Room images use an `image_url` field to keep setup lightweight.
-- Submitted bookings default to `Pending`.
-- Time slot conflicts are blocked against pending and approved bookings.
+## 🛠 Tech Stack
+
+* **Backend:** Django 4.x
+* **Database:** SQLite (development)
+* **Containerization:** Docker & Docker Compose
+* **Server:** Django development server (upgrade to Gunicorn planned)
+
+---
+
+## 🐳 Run with Docker (Recommended)
+
+```bash
+docker-compose up --build
+```
+
+Visit:
+http://localhost:8000
+
+---
+
+## 🧪 Run Locally (Without Docker)
+
+```bash
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py createsuperuser
+python manage.py runserver
+```
+
+---
+
+## 🔐 Admin Access
+
+* URL: `/admin/`
+* Manage:
+
+  * Rooms
+  * Bookings
+
+---
+
+## 📌 Future Improvements
+
+* PostgreSQL integration
+* User authentication system
+* Deployment (Render / AWS)
+* Gunicorn + Nginx setup
+
+---
+
+## 💡 Key Highlights
+
+* Dockerized environment for reproducibility
+* Booking conflict detection logic
+* Clean Django project structure
