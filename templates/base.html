@@ -1,0 +1,53 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SpaceFlow{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/site.css' %}">
+</head>
+<body>
+    <div class="site-shell">
+        <div class="ambient ambient-one"></div>
+        <div class="ambient ambient-two"></div>
+        <header class="site-header">
+            <a class="brand" href="{% url 'booking:home' %}">
+                <span class="brand-mark">SF</span>
+                <span>
+                    <strong>SpaceFlow</strong>
+                    <small>Event Space Booking</small>
+                </span>
+            </a>
+            <nav class="site-nav">
+                <a href="{% url 'booking:home' %}" {% if request.resolver_match.url_name == 'home' %}class="is-active"{% endif %}>Home</a>
+                <a href="{% url 'booking:room_list' %}" {% if 'room' in request.resolver_match.url_name %}class="is-active"{% endif %}>Rooms</a>
+                <a href="{% url 'booking:about' %}" {% if request.resolver_match.url_name == 'about' %}class="is-active"{% endif %}>About</a>
+                <a href="/admin/">Admin</a>
+            </nav>
+        </header>
+
+        {% if messages %}
+            <section class="message-stack">
+                {% for message in messages %}
+                    <div class="message-card">{{ message }}</div>
+                {% endfor %}
+            </section>
+        {% endif %}
+
+        <main class="page-content">
+            {% block content %}{% endblock %}
+        </main>
+
+        <footer class="site-footer">
+            <p>SpaceFlow helps students, organizers, and administrators coordinate event spaces with less friction.</p>
+            <div class="footer-links">
+                <a href="{% url 'booking:room_list' %}">Browse spaces</a>
+                <a href="{% url 'booking:about' %}">How it works</a>
+                <a href="/admin/">Django Admin</a>
+            </div>
+        </footer>
+    </div>
+    <script src="{% static 'js/site.js' %}"></script>
+</body>
+</html>

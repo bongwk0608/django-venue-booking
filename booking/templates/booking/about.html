@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}About | SpaceFlow{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <p class="eyebrow">About Page</p>
+        <h1>A booking platform built to simplify room reservations.</h1>
+        <p>SpaceFlow helps users discover venues, submit requests clearly, and keeps approvals visible for administrators.</p>
+    </div>
+</section>
+
+<section class="section-grid">
+    <article class="panel">
+        <h2>Platform purpose</h2>
+        <p>
+            This platform centralizes room discovery and booking requests for event spaces such as halls,
+            classrooms, conference rooms, studios, and outdoor areas.
+        </p>
+    </article>
+    <article class="panel">
+        <h2>How to use it</h2>
+        <ul class="detail-list">
+            <li>Open the room list and filter spaces by type or capacity.</li>
+            <li>Review the room detail page for venue information and image.</li>
+            <li>Submit the booking form and wait for approval.</li>
+            <li>Administrators manage rooms and booking statuses in Django Admin.</li>
+        </ul>
+    </article>
+</section>
+
+<section class="section-head">
+    <div>
+        <p class="eyebrow">Available spaces</p>
+        <h2>Rooms appear here once added from the admin side.</h2>
+    </div>
+</section>
+
+<section class="card-grid">
+    {% for room in recent_rooms %}
+        <article class="room-card reveal-card">
+            <div class="room-card-media" {% if room.image_url %}style="background-image: linear-gradient(135deg, rgba(13, 58, 86, 0.12), rgba(233, 110, 76, 0.18)), url('{{ room.image_url }}');"{% endif %}></div>
+            <div class="room-card-body">
+                <div class="room-card-meta">
+                    <span>{{ room.get_room_type_display }}</span>
+                    <span>{{ room.capacity }} pax</span>
+                </div>
+                <h3>{{ room.name }}</h3>
+                <p>{{ room.short_description }}</p>
+            </div>
+        </article>
+    {% empty %}
+        <article class="panel empty-panel">
+            <h3>No rooms published yet</h3>
+            <p>Add room records through the admin dashboard to populate this section.</p>
+        </article>
+    {% endfor %}
+</section>
+{% endblock %}

@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}{{ room.name }} | SpaceFlow{% endblock %}
+
+{% block content %}
+<section class="detail-hero">
+    <div class="detail-media" {% if room.image_url %}style="background-image: linear-gradient(135deg, rgba(13, 58, 86, 0.12), rgba(233, 110, 76, 0.18)), url('{{ room.image_url }}');"{% endif %}></div>
+    <div class="detail-copy">
+        <p class="eyebrow">Room Detail Page</p>
+        <h1>{{ room.name }}</h1>
+        <p class="hero-text">{{ room.short_description }}</p>
+        <div class="pill-row">
+            <span class="pill">{{ room.get_room_type_display }}</span>
+            <span class="pill">{{ room.capacity }} people</span>
+            <span class="pill">{{ room.location }}</span>
+        </div>
+    </div>
+</section>
+
+<section class="detail-grid">
+    <article class="panel">
+        <h2>About this space</h2>
+        <p>{{ room.description }}</p>
+    </article>
+    <article class="panel">
+        <h2>Key details</h2>
+        <ul class="detail-list">
+            <li>Name: {{ room.name }}</li>
+            <li>Type: {{ room.get_room_type_display }}</li>
+            <li>Capacity: {{ room.capacity }} people</li>
+            <li>Location: {{ room.location }}</li>
+        </ul>
+        <p class="support-note">If the room fits your event, continue to the booking form below.</p>
+    </article>
+</section>
+
+<section class="panel availability-panel">
+    <div class="availability-header">
+        <div>
+            <p class="eyebrow">Availability Overview</p>
+            <h2>See when this room is free before you book.</h2>
+            <p>
+                Pick a date to review the room's current schedule. Approved and pending bookings
+                are both treated as unavailable until the request is resolved.
+            </p>
+        </div>
+        <form method="get" class="availability-controls">
+            <a class="button button-secondary" href="?date={{ previous_date|date:'Y-m-d' }}">Previous Day</a>
+            <label class="field-group">
+                <span>Select date</span>
+                <input type="date" name="date" value="{{ selected_date|date:'Y-m-d' }}">
+            </label>
+            <button class="button button-primary" type="submit">Show Schedule</button>
+            <a class="button button-secondary" href="?date={{ next_date|date:'Y-m-d' }}">Next Day</a>
+        </form>
+    </div>
+
+    <div class="availability-summary-cards">
+        <div class="mini-stat">
+            <span>Selected Date</span>
+            <strong>{{ selected_date|date:"l, d M Y" }}</strong>
+        </div>
+        <div class="mini-stat">
+            <span>Available Slots</span>
+            <strong>{{ available_slot_count }}</strong>
+        </div>
+        <div class="mini-stat">
+            <span>Pending Slots</span>
+            <strong>{{ pending_slot_count }}</strong>
+        </div>
+        <div class="mini-stat">
+            <span>Approved Slots</span>
+            <strong>{{ approved_slot_count }}</strong>
+        </div>
+    </div>
+
+    <div class="availability-legend">
+        <span><i class="legend-swatch legend-swatch-available"></i> Available</span>
+        <span><i class="legend-swatch legend-swatch-pending"></i> Pending approval</span>
+        <span><i class="legend-swatch legend-swatch-approved"></i> Booked / approved</span>
+    </div>
+
+    <div class="timeline-shell">
+        <div class="timeline-hours" style="grid-template-columns: repeat({{ slots|length }}, minmax(38px, 1fr));">
+            {% for label in time_labels %}
+                <div class="timeline-hour" style="grid-column: span {{ label.span }};">{{ label.label }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="timeline-grid" style="grid-template-columns: repeat({{ slots|length }}, minmax(38px, 1fr));">
+            {% for slot in slots %}
+                <div class="timeline-slot timeline-slot-{{ slot.state }}" title="{{ slot.tooltip }}"></div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="availability-notes">
+        <div class="schedule-list">
+            <h3>Bookings on {{ selected_date|date:"d M Y" }}</h3>
+            {% for booking in daily_bookings %}
+                <article class="schedule-item schedule-item-{{ booking.status }}">
+                    <div>
+                        <strong>{{ booking.start_time|time:"H:i" }} - {{ booking.end_time|time:"H:i" }}</strong>
+                        <p>{{ booking.get_status_display }}</p>
+                    </div>
+                    <span class="schedule-badge">{{ booking.get_status_display }}</span>
+                </article>
+            {% empty %}
+                <article class="schedule-empty">
+                    <strong>No bookings on this date.</strong>
+                    <p>This room is fully available within the displayed schedule window.</p>
+                </article>
+            {% endfor %}
+        </div>
+
+        <div class="schedule-list">
+            <h3>Upcoming schedule</h3>
+            {% for booking in upcoming_bookings %}
+                <article class="schedule-item schedule-item-{{ booking.status }}">
+                    <div>
+                        <strong>{{ booking.booking_date|date:"d M Y" }}</strong>
+                        <p>{{ booking.start_time|time:"H:i" }} - {{ booking.end_time|time:"H:i" }}</p>
+                    </div>
+                    <span class="schedule-badge">{{ booking.get_status_display }}</span>
+                </article>
+            {% empty %}
+                <article class="schedule-empty">
+                    <strong>No upcoming reservations.</strong>
+                    <p>You can proceed with a new booking request for this space.</p>
+                </article>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section class="cta-banner">
+    <div>
+        <p class="eyebrow">Ready to reserve?</p>
+        <h2>Submit your booking request and wait for approval.</h2>
+    </div>
+    <a class="button button-primary" href="{% url 'booking:booking_create' room.slug %}?date={{ selected_date|date:'Y-m-d' }}">Book Now</a>
+</section>
+{% endblock %}

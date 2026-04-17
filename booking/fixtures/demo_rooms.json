@@ -1,0 +1,44 @@
+[
+  {
+    "model": "booking.room",
+    "pk": 1,
+    "fields": {
+      "name": "Aurora Conference Room",
+      "slug": "aurora-conference-room",
+      "room_type": "conference",
+      "capacity": 24,
+      "location": "Block A, Level 3",
+      "short_description": "A polished meeting room for presentations, panels, and strategy sessions.",
+      "description": "Aurora Conference Room is designed for formal meetings and presentations. It offers a focused atmosphere, comfortable seating, and enough space for collaborative sessions with a medium-sized team.",
+      "image_url": "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1200&q=80"
+    }
+  },
+  {
+    "model": "booking.room",
+    "pk": 2,
+    "fields": {
+      "name": "Canvas Studio",
+      "slug": "canvas-studio",
+      "room_type": "studio",
+      "capacity": 12,
+      "location": "Creative Wing, Level 2",
+      "short_description": "A bright studio for rehearsals, media production, and creative workshops.",
+      "description": "Canvas Studio is ideal for smaller creative sessions. The room works well for photography setups, rehearsals, training videos, and idea sprints that need a more informal environment.",
+      "image_url": "https://images.unsplash.com/photo-1497366412874-3415097a27e7?auto=format&fit=crop&w=1200&q=80"
+    }
+  },
+  {
+    "model": "booking.room",
+    "pk": 3,
+    "fields": {
+      "name": "Harbor Event Hall",
+      "slug": "harbor-event-hall",
+      "room_type": "hall",
+      "capacity": 120,
+      "location": "Main Building, Ground Floor",
+      "short_description": "A large hall for showcases, public talks, ceremonies, and community events.",
+      "description": "Harbor Event Hall accommodates larger audiences and gives organizers room to configure seating, displays, and registration areas. It is suitable for high-traffic events that need visibility and flexibility.",
+      "image_url": "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=1200&q=80"
+    }
+  }
+]

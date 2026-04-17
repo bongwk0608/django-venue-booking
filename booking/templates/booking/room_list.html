@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Rooms | SpaceFlow{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <p class="eyebrow">Room List Page</p>
+        <h1>Browse all bookable event spaces.</h1>
+        <p>Filter by room type or minimum capacity to find the best fit for your activity.</p>
+    </div>
+</section>
+
+<section class="listing-layout">
+    <aside class="panel filter-panel">
+        <h2>Filter spaces</h2>
+        <form method="get" class="filter-form">
+            <label>
+                Room type
+                {{ filter_form.room_type }}
+            </label>
+            <label>
+                Minimum capacity
+                {{ filter_form.capacity }}
+            </label>
+            <button class="button button-primary" type="submit">Apply Filters</button>
+            <a class="button button-secondary" href="{% url 'booking:room_list' %}">Reset</a>
+        </form>
+    </aside>
+
+    <div class="listing-main">
+        <div class="summary-strip">
+            <span>{{ rooms|length }} room{{ rooms|pluralize }} found</span>
+            <span>Use the cards below to compare venue options.</span>
+        </div>
+
+        <section class="card-grid">
+            {% for room in rooms %}
+                <article class="room-card reveal-card">
+                    <div class="room-card-media" {% if room.image_url %}style="background-image: linear-gradient(135deg, rgba(13, 58, 86, 0.12), rgba(233, 110, 76, 0.18)), url('{{ room.image_url }}');"{% endif %}></div>
+                    <div class="room-card-body">
+                        <div class="room-card-meta">
+                            <span>{{ room.get_room_type_display }}</span>
+                            <span>{{ room.capacity }} pax</span>
+                        </div>
+                        <h3>{{ room.name }}</h3>
+                        <p>{{ room.short_description }}</p>
+                        <ul class="detail-list">
+                            <li>Location: {{ room.location }}</li>
+                            <li>Best for: workshops, meetings, and events</li>
+                        </ul>
+                        <div class="room-card-footer">
+                            <span>Ready to review</span>
+                            <a href="{{ room.get_absolute_url }}">Open Room</a>
+                        </div>
+                    </div>
+                </article>
+            {% empty %}
+                <article class="panel empty-panel">
+                    <h3>No matching rooms</h3>
+                    <p>Try a broader filter or add more spaces from Django Admin.</p>
+                </article>
+            {% endfor %}
+        </section>
+    </div>
+</section>
+{% endblock %}

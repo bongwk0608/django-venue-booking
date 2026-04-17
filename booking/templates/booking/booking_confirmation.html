@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Booking Confirmed | SpaceFlow{% endblock %}
+
+{% block content %}
+<section class="confirmation-shell">
+    <article class="panel confirmation-card">
+        <p class="eyebrow">Booking Confirmation Page</p>
+        <h1>Your reservation request has been submitted.</h1>
+        <p>The booking is now waiting for administrator review.</p>
+        <div class="status-badge">Status: {{ booking.get_status_display }}</div>
+
+        <div class="confirmation-grid">
+            <div>
+                <span>Room</span>
+                <strong>{{ booking.room.name }}</strong>
+            </div>
+            <div>
+                <span>Date</span>
+                <strong>{{ booking.booking_date }}</strong>
+            </div>
+            <div>
+                <span>Time</span>
+                <strong>{{ booking.start_time }} - {{ booking.end_time }}</strong>
+            </div>
+            <div>
+                <span>Purpose</span>
+                <strong>{{ booking.purpose }}</strong>
+            </div>
+        </div>
+
+        <div class="hero-actions">
+            <a class="button button-primary" href="{% url 'booking:room_list' %}">Book Another Space</a>
+            <a class="button button-secondary" href="{% url 'booking:home' %}">Return Home</a>
+        </div>
+    </article>
+</section>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Book {{ room.name }} | SpaceFlow{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <p class="eyebrow">Booking Form Page</p>
+        <h1>Reserve {{ room.name }}</h1>
+        <p>Fill in your booking details. The system checks for time conflicts before submission.</p>
+    </div>
+</section>
+
+<section class="form-layout">
+    <article class="panel summary-panel">
+        <h2>Room summary</h2>
+        <ul class="detail-list">
+            <li>Room: {{ room.name }}</li>
+            <li>Type: {{ room.get_room_type_display }}</li>
+            <li>Capacity: {{ room.capacity }} people</li>
+            <li>Location: {{ room.location }}</li>
+        </ul>
+        <p class="support-note">All successful submissions will be marked as pending until an administrator reviews them.</p>
+    </article>
+
+    <article class="panel">
+        <h2>Your booking details</h2>
+
+        {% if form.non_field_errors %}
+            <div class="error-box">
+                {% for error in form.non_field_errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="post" class="booking-form" data-min-date="{{ today|date:'Y-m-d' }}">
+            {% csrf_token %}
+            {% for field in form %}
+                <label class="field-group">
+                    <span>{{ field.label }}</span>
+                    {{ field }}
+                    {% if field.errors %}
+                        <small class="field-error">{{ field.errors|join:", " }}</small>
+                    {% endif %}
+                </label>
+            {% endfor %}
+            <button class="button button-primary" type="submit">Submit Booking Request</button>
+        </form>
+    </article>
+</section>
+{% endblock %}

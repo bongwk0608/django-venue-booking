@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Home | SpaceFlow{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-copy">
+        <p class="eyebrow">Flexible booking for campus and community events</p>
+        <h1>Find the right room, reserve it in minutes, and keep approvals organized.</h1>
+        <p class="hero-text">
+            SpaceFlow gives users a clear path from browsing venues to submitting bookings,
+            while administrators manage rooms and approvals from Django Admin.
+        </p>
+        <div class="hero-actions">
+            <a class="button button-primary" href="{% url 'booking:room_list' %}">Explore Available Rooms</a>
+            <a class="button button-secondary" href="{% url 'booking:about' %}">Learn How It Works</a>
+        </div>
+    </div>
+    <div class="hero-panel">
+        <div class="metric-card">
+            <span>Total Spaces</span>
+            <strong>{{ stats.room_count }}</strong>
+        </div>
+        <div class="metric-card">
+            <span>Pending Requests</span>
+            <strong>{{ stats.pending_count }}</strong>
+        </div>
+        <div class="metric-card">
+            <span>Managed Locations</span>
+            <strong>{{ stats.location_count }}</strong>
+        </div>
+    </div>
+</section>
+
+<section class="section-grid">
+    <article class="panel feature-panel">
+        <p class="eyebrow">User Journey</p>
+        <h2>Everything a visitor needs is grouped into a simple booking flow.</h2>
+        <div class="steps">
+            <div>
+                <strong>1. Browse rooms</strong>
+                <p>Compare type, capacity, and location before opening a room profile.</p>
+            </div>
+            <div>
+                <strong>2. Review room details</strong>
+                <p>See the venue description, image, and quick facts before booking.</p>
+            </div>
+            <div>
+                <strong>3. Submit a booking</strong>
+                <p>Fill in date, time, purpose, and contact details with conflict checking.</p>
+            </div>
+        </div>
+    </article>
+
+    <article class="panel accent-panel">
+        <p class="eyebrow">Admin Workflow</p>
+        <h2>Use Django Admin for room management and booking approval.</h2>
+        <p>
+            The admin backend provides built-in login, model dashboards, room CRUD management,
+            filtered booking lists, and bulk approval or rejection actions.
+        </p>
+        <a class="text-link" href="/admin/">Open Admin Login</a>
+    </article>
+</section>
+
+<section class="section-head">
+    <div>
+        <p class="eyebrow">Featured Spaces</p>
+        <h2>Suggested rooms to get your booking journey started.</h2>
+    </div>
+    <a class="text-link" href="{% url 'booking:room_list' %}">See all rooms</a>
+</section>
+
+<section class="card-grid">
+    {% for room in featured_rooms %}
+        <article class="room-card reveal-card">
+            <div class="room-card-media" {% if room.image_url %}style="background-image: linear-gradient(135deg, rgba(13, 58, 86, 0.12), rgba(233, 110, 76, 0.18)), url('{{ room.image_url }}');"{% endif %}></div>
+            <div class="room-card-body">
+                <div class="room-card-meta">
+                    <span>{{ room.get_room_type_display }}</span>
+                    <span>{{ room.capacity }} pax</span>
+                </div>
+                <h3>{{ room.name }}</h3>
+                <p>{{ room.short_description }}</p>
+                <div class="room-card-footer">
+                    <span>{{ room.location }}</span>
+                    <a href="{{ room.get_absolute_url }}">View Details</a>
+                </div>
+            </div>
+        </article>
+    {% empty %}
+        <article class="panel empty-panel">
+            <h3>No rooms added yet.</h3>
+            <p>Add room records in Django Admin and they will appear here automatically.</p>
+        </article>
+    {% endfor %}
+</section>
+{% endblock %}
