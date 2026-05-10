@@ -1,11 +1,12 @@
+import os
 from pathlib import Path
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = "replace-me-before-production"
-DEBUG = True
-ALLOWED_HOSTS: list[str] = []
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "replace-me-before-production")
+DEBUG = os.environ.get("DJANGO_DEBUG", "True").lower() in {"1", "true", "yes", "on"}
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1,testserver").split(",")
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -72,3 +73,7 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+LOGIN_URL = "booking:login"
+LOGIN_REDIRECT_URL = "booking:profile"
+LOGOUT_REDIRECT_URL = "booking:home"

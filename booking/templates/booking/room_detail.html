@@ -6,7 +6,7 @@
 <section class="detail-hero">
     <div class="detail-media" {% if room.image_url %}style="background-image: linear-gradient(135deg, rgba(13, 58, 86, 0.12), rgba(233, 110, 76, 0.18)), url('{{ room.image_url }}');"{% endif %}></div>
     <div class="detail-copy">
-        <p class="eyebrow">Room Detail Page</p>
+        <p class="eyebrow">Room details</p>
         <h1>{{ room.name }}</h1>
         <p class="hero-text">{{ room.short_description }}</p>
         <div class="pill-row">
@@ -37,7 +37,7 @@
 <section class="panel availability-panel">
     <div class="availability-header">
         <div>
-            <p class="eyebrow">Availability Overview</p>
+            <p class="eyebrow">Availability overview</p>
             <h2>See when this room is free before you book.</h2>
             <p>
                 Pick a date to review the room's current schedule. Approved and pending bookings
@@ -136,8 +136,10 @@
 <section class="cta-banner">
     <div>
         <p class="eyebrow">Ready to reserve?</p>
-        <h2>Submit your booking request and wait for approval.</h2>
+        <h2>{% if user.is_authenticated %}Submit your booking request and wait for approval.{% else %}Login or create an account before booking this room.{% endif %}</h2>
     </div>
-    <a class="button button-primary" href="{% url 'booking:booking_create' room.slug %}?date={{ selected_date|date:'Y-m-d' }}">Book Now</a>
+    <a class="button button-primary" href="{% url 'booking:booking_create' room.slug %}?date={{ selected_date|date:'Y-m-d' }}">
+        {% if user.is_authenticated %}Book Now{% else %}Login to Book{% endif %}
+    </a>
 </section>
 {% endblock %}

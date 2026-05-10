@@ -5,7 +5,7 @@
 {% block content %}
 <section class="page-header">
     <div>
-        <p class="eyebrow">Room List Page</p>
+        <p class="eyebrow">Browse rooms</p>
         <h1>Browse all bookable event spaces.</h1>
         <p>Filter by room type or minimum capacity to find the best fit for your activity.</p>
     </div>
@@ -51,7 +51,7 @@
                         </ul>
                         <div class="room-card-footer">
                             <span>Ready to review</span>
-                            <a href="{{ room.get_absolute_url }}">Open Room</a>
+                            <a class="room-action-button" href="{{ room.get_absolute_url }}">Book</a>
                         </div>
                     </div>
                 </article>

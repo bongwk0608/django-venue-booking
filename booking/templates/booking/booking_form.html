@@ -5,9 +5,9 @@
 {% block content %}
 <section class="page-header">
     <div>
-        <p class="eyebrow">Booking Form Page</p>
+        <p class="eyebrow">Booking request</p>
         <h1>Reserve {{ room.name }}</h1>
-        <p>Fill in your booking details. The system checks for time conflicts before submission.</p>
+        <p>Your account will be linked to this booking. The system checks for time conflicts before submission.</p>
     </div>
 </section>
 
@@ -21,6 +21,10 @@
             <li>Location: {{ room.location }}</li>
         </ul>
         <p class="support-note">All successful submissions will be marked as pending until an administrator reviews them.</p>
+        <div class="account-note">
+            <strong>Booking as {{ user.get_full_name|default:user.username }}</strong>
+            <span>{{ user.email|default:"No email saved on this account" }}</span>
+        </div>
     </article>
 
     <article class="panel">
@@ -36,6 +40,30 @@
 
         <form method="post" class="booking-form" data-min-date="{{ today|date:'Y-m-d' }}">
             {% csrf_token %}
+            <section class="slot-picker" aria-label="Available time slots">
+                <div class="slot-picker-head">
+                    <div>
+                        <p class="eyebrow">Available times</p>
+                        <h3>{{ selected_date|date:"l, d M Y" }}</h3>
+                    </div>
+                    <span>Click a 1-hour slot to fill the time fields.</span>
+                </div>
+                <div class="slot-grid">
+                    {% for slot in slot_options %}
+                        <button
+                            class="slot-choice {% if not slot.is_available %}slot-choice-disabled{% endif %}"
+                            type="button"
+                            data-start="{{ slot.start }}"
+                            data-end="{{ slot.end }}"
+                            {% if not slot.is_available %}disabled{% endif %}
+                        >
+                            <strong>{{ slot.label }}</strong>
+                            <small>{{ slot.status }}</small>
+                        </button>
+                    {% endfor %}
+                </div>
+            </section>
+
             {% for field in form %}
                 <label class="field-group">
                     <span>{{ field.label }}</span>

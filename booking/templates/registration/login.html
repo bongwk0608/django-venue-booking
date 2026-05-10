@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Login | SpaceFlow{% endblock %}
+
+{% block content %}
+<section class="auth-shell">
+    <article class="panel auth-card">
+        <p class="eyebrow">User login</p>
+        <h1>Welcome back.</h1>
+        <p>Login to submit booking requests and track approval status from your profile.</p>
+
+        {% if form.non_field_errors %}
+            <div class="error-box">
+                {% for error in form.non_field_errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="post" class="auth-form">
+            {% csrf_token %}
+            {% for field in form %}
+                <label class="field-group">
+                    <span>{{ field.label }}</span>
+                    {{ field }}
+                    {% if field.errors %}
+                        <small class="field-error">{{ field.errors|join:", " }}</small>
+                    {% endif %}
+                </label>
+            {% endfor %}
+            <button class="button button-primary" type="submit">Login</button>
+        </form>
+
+        <p class="auth-switch">New to SpaceFlow? <a href="{% url 'booking:register' %}">Create an account</a></p>
+    </article>
+</section>
+{% endblock %}

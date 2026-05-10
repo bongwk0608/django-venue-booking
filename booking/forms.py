@@ -1,4 +1,6 @@
 from django import forms
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 
 from .models import Booking, Room
@@ -14,6 +16,41 @@ class RoomFilterForm(forms.Form):
         min_value=1,
         widget=forms.NumberInput(attrs={"placeholder": "Minimum capacity"}),
     )
+
+
+class RegistrationForm(UserCreationForm):
+    email = forms.EmailField(required=True, widget=forms.EmailInput(attrs={"placeholder": "name@example.com"}))
+    first_name = forms.CharField(
+        max_length=150,
+        required=False,
+        widget=forms.TextInput(attrs={"placeholder": "First name"}),
+    )
+    last_name = forms.CharField(
+        max_length=150,
+        required=False,
+        widget=forms.TextInput(attrs={"placeholder": "Last name"}),
+    )
+
+    class Meta:
+        model = User
+        fields = ["username", "first_name", "last_name", "email", "password1", "password2"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["username"].widget.attrs.setdefault("placeholder", "Choose a username")
+        self.fields["password1"].widget.attrs.setdefault("placeholder", "Create a password")
+        self.fields["password2"].widget.attrs.setdefault("placeholder", "Confirm password")
+        for field in self.fields.values():
+            field.widget.attrs.setdefault("class", "form-control")
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.email = self.cleaned_data["email"]
+        user.first_name = self.cleaned_data.get("first_name", "")
+        user.last_name = self.cleaned_data.get("last_name", "")
+        if commit:
+            user.save()
+        return user
 
 
 class BookingForm(forms.ModelForm):
@@ -45,9 +82,14 @@ class BookingForm(forms.ModelForm):
             ),
         }
 
-    def __init__(self, *args, room=None, **kwargs):
+    def __init__(self, *args, room=None, user=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.room = room
+        self.user = user
+        if user and user.is_authenticated and not self.is_bound:
+            display_name = user.get_full_name() or user.username
+            self.fields["full_name"].initial = display_name
+            self.fields["email"].initial = user.email
         for field in self.fields.values():
             field.widget.attrs.setdefault("class", "form-control")
 
@@ -55,6 +97,8 @@ class BookingForm(forms.ModelForm):
         instance = super().save(commit=False)
         if self.room is not None:
             instance.room = self.room
+        if self.user is not None and self.user.is_authenticated:
+            instance.user = self.user
         if commit:
             instance.full_clean()
             instance.save()
@@ -66,6 +110,7 @@ class BookingForm(forms.ModelForm):
             return cleaned_data
 
         candidate = Booking(
+            user=self.user if self.user and self.user.is_authenticated else None,
             room=self.room,
             full_name=cleaned_data.get("full_name", ""),
             email=cleaned_data.get("email", ""),

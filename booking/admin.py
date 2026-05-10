@@ -25,14 +25,16 @@ def reject_bookings(modeladmin, request, queryset):
 class BookingAdmin(admin.ModelAdmin):
     list_display = (
         "room",
+        "user",
         "full_name",
+        "email",
         "booking_date",
         "start_time",
         "end_time",
         "status",
     )
-    list_filter = ("status", "booking_date", "room")
-    search_fields = ("full_name", "email", "room__name", "purpose")
+    list_filter = ("status", "booking_date", "room", "user__is_staff")
+    search_fields = ("full_name", "email", "user__username", "user__email", "room__name", "purpose")
     date_hierarchy = "booking_date"
     actions = [approve_bookings, reject_bookings]
 

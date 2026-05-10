@@ -1,7 +1,14 @@
-version: '3.9'
-
 services:
   web:
     build: .
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py loaddata booking/fixtures/demo_rooms.json &&
+             python manage.py runserver 0.0.0.0:8000"
+    environment:
+      DJANGO_DEBUG: "True"
+      DJANGO_ALLOWED_HOSTS: "localhost,127.0.0.1,0.0.0.0"
     ports:
       - "8000:8000"
+    volumes:
+      - .:/app

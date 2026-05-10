@@ -5,9 +5,9 @@
 {% block content %}
 <section class="page-header">
     <div>
-        <p class="eyebrow">About Page</p>
-        <h1>A booking platform built to simplify room reservations.</h1>
-        <p>SpaceFlow helps users discover venues, submit requests clearly, and keeps approvals visible for administrators.</p>
+        <p class="eyebrow">About SpaceFlow</p>
+        <h1>A booking platform built to simplify campus room reservations.</h1>
+        <p>SpaceFlow helps users discover venues, submit authenticated requests, and track approval status.</p>
     </div>
 </section>
 
@@ -24,9 +24,31 @@
         <ul class="detail-list">
             <li>Open the room list and filter spaces by type or capacity.</li>
             <li>Review the room detail page for venue information and image.</li>
-            <li>Submit the booking form and wait for approval.</li>
+            <li>Login, submit the booking form, and wait for approval.</li>
             <li>Administrators manage rooms and booking statuses in Django Admin.</li>
         </ul>
+    </article>
+</section>
+
+<section class="section-grid">
+    <article class="panel">
+        <p class="eyebrow">MVC explanation</p>
+        <h2>The project follows Django's MVC-style structure.</h2>
+        <ul class="detail-list">
+            <li><strong>models.py</strong> stores the data structure for rooms and bookings.</li>
+            <li><strong>views.py</strong> handles request logic, validation flow, and page context.</li>
+            <li><strong>templates</strong> render the presentation layer shown to users.</li>
+            <li><strong>urls.py</strong> maps browser routes to the correct views.</li>
+        </ul>
+    </article>
+    <article class="panel">
+        <p class="eyebrow">Database choice</p>
+        <h2>SQLite is intentionally used for this university demo.</h2>
+        <p>
+            SQLite keeps setup simple, works well for a single demo instance, and is fully supported
+            by Django migrations. PostgreSQL would be a future scalability upgrade, not a requirement
+            for this project scope.
+        </p>
     </article>
 </section>
 

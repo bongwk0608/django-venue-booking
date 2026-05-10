@@ -1,4 +1,5 @@
 from django.core.exceptions import ValidationError
+from django.conf import settings
 from django.db import models
 from django.db.models import Q
 from django.urls import reverse
@@ -43,6 +44,13 @@ class Booking(models.Model):
         APPROVED = "approved", "Approved"
         REJECTED = "rejected", "Rejected"
 
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name="bookings",
+        null=True,
+        blank=True,
+    )
     room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name="bookings")
     full_name = models.CharField(max_length=120)
     email = models.EmailField()

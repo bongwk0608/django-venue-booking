@@ -1,0 +1,31 @@
+<section class="panel table-panel">
+    {% if bookings %}
+        <div class="booking-table">
+            <div class="booking-row booking-row-head">
+                <span>Room</span>
+                <span>Date</span>
+                <span>Time</span>
+                <span>Status</span>
+                <span>Action</span>
+            </div>
+            {% for booking in bookings %}
+                <div class="booking-row">
+                    <span>
+                        <strong>{{ booking.room.name }}</strong>
+                        <small>{{ booking.room.location }}</small>
+                    </span>
+                    <span>{{ booking.booking_date|date:"d M Y" }}</span>
+                    <span>{{ booking.start_time|time:"H:i" }} - {{ booking.end_time|time:"H:i" }}</span>
+                    <span><i class="status-chip status-chip-{{ booking.status }}">{{ booking.get_status_display }}</i></span>
+                    <span><a class="text-link" href="{% url 'booking:booking_confirmation' booking.pk %}">Details</a></span>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <article class="empty-state">
+            <h3>No bookings yet.</h3>
+            <p>Browse the room list and submit your first request when you find a suitable space.</p>
+            <a class="button button-primary" href="{% url 'booking:room_list' %}">Browse Rooms</a>
+        </article>
+    {% endif %}
+</section>

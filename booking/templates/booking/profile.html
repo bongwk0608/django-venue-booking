@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Profile | SpaceFlow{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <p class="eyebrow">My profile</p>
+        <h1>{{ user.get_full_name|default:user.username }}</h1>
+        <p>Review your account and recent booking activity in one place.</p>
+    </div>
+    <a class="button button-primary" href="{% url 'booking:room_list' %}">Book a Room</a>
+</section>
+
+<section class="profile-grid">
+    <article class="panel">
+        <h2>Account details</h2>
+        <ul class="detail-list">
+            <li>Username: {{ user.username }}</li>
+            <li>Email: {{ user.email|default:"Not provided" }}</li>
+            <li>Role: {% if user.is_staff %}Staff / Admin{% else %}User{% endif %}</li>
+        </ul>
+    </article>
+    <article class="panel status-panel">
+        <h2>Booking status</h2>
+        <div class="availability-summary-cards compact-stats">
+            <div class="mini-stat">
+                <span>Pending</span>
+                <strong>{{ pending_count }}</strong>
+            </div>
+            <div class="mini-stat">
+                <span>Approved</span>
+                <strong>{{ approved_count }}</strong>
+            </div>
+            <div class="mini-stat">
+                <span>Rejected</span>
+                <strong>{{ rejected_count }}</strong>
+            </div>
+        </div>
+    </article>
+</section>
+
+<section class="section-head">
+    <div>
+        <p class="eyebrow">Recent bookings</p>
+        <h2>Your latest room requests.</h2>
+    </div>
+    <a class="text-link" href="{% url 'booking:booking_history' %}">View full history</a>
+</section>
+
+{% include "booking/partials/booking_table.html" with bookings=bookings %}
+{% endblock %}

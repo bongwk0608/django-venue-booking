@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Register | SpaceFlow{% endblock %}
+
+{% block content %}
+<section class="auth-shell">
+    <article class="panel auth-card">
+        <p class="eyebrow">Create account</p>
+        <h1>Start booking with a user profile.</h1>
+        <p>Your account connects booking requests to your history, so you can track each request after submission.</p>
+
+        <form method="post" class="auth-form">
+            {% csrf_token %}
+            {% for field in form %}
+                <label class="field-group">
+                    <span>{{ field.label }}</span>
+                    {{ field }}
+                    {% if field.help_text %}
+                        <small class="field-help">{{ field.help_text }}</small>
+                    {% endif %}
+                    {% if field.errors %}
+                        <small class="field-error">{{ field.errors|join:", " }}</small>
+                    {% endif %}
+                </label>
+            {% endfor %}
+            <button class="button button-primary" type="submit">Create Account</button>
+        </form>
+
+        <p class="auth-switch">Already registered? <a href="{% url 'booking:login' %}">Login instead</a></p>
+    </article>
+</section>
+{% endblock %}

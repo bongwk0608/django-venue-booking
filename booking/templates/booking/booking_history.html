@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}My Bookings | SpaceFlow{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <p class="eyebrow">My bookings</p>
+        <h1>Track every room request linked to your account.</h1>
+        <p>Pending bookings are waiting for administrator review. Approved bookings are confirmed.</p>
+    </div>
+    <a class="button button-primary" href="{% url 'booking:room_list' %}">New Booking</a>
+</section>
+
+{% include "booking/partials/booking_table.html" with bookings=bookings %}
+{% endblock %}
