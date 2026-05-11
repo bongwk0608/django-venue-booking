@@ -21,6 +21,11 @@ def reject_bookings(modeladmin, request, queryset):
     queryset.update(status=Booking.Status.REJECTED)
 
 
+@admin.action(description="Mark selected bookings as cancelled")
+def cancel_bookings(modeladmin, request, queryset):
+    queryset.update(status=Booking.Status.CANCELLED)
+
+
 @admin.register(Booking)
 class BookingAdmin(admin.ModelAdmin):
     list_display = (
@@ -36,7 +41,7 @@ class BookingAdmin(admin.ModelAdmin):
     list_filter = ("status", "booking_date", "room", "user__is_staff")
     search_fields = ("full_name", "email", "user__username", "user__email", "room__name", "purpose")
     date_hierarchy = "booking_date"
-    actions = [approve_bookings, reject_bookings]
+    actions = [approve_bookings, reject_bookings, cancel_bookings]
 
 
 admin.site.site_header = "SpaceFlow Admin"

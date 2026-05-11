@@ -17,7 +17,17 @@
                     <span>{{ booking.booking_date|date:"d M Y" }}</span>
                     <span>{{ booking.start_time|time:"H:i" }} - {{ booking.end_time|time:"H:i" }}</span>
                     <span><i class="status-chip status-chip-{{ booking.status }}">{{ booking.get_status_display }}</i></span>
-                    <span><a class="text-link" href="{% url 'booking:booking_confirmation' booking.pk %}">Details</a></span>
+                    <span class="booking-actions">
+                        <a class="table-action-link" href="{% url 'booking:booking_confirmation' booking.pk %}">Details</a>
+                        {% if booking.can_cancel_for_current_user %}
+                            <form method="post" action="{% url 'booking:booking_cancel' booking.pk %}">
+                                {% csrf_token %}
+                                <button class="table-action-link table-action-danger" type="submit">Cancel</button>
+                            </form>
+                        {% elif booking.has_started and booking.status != "cancelled" and booking.status != "rejected" %}
+                            <span class="table-action-note">Past booking</span>
+                        {% endif %}
+                    </span>
                 </div>
             {% endfor %}
         </div>

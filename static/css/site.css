@@ -445,6 +445,34 @@ textarea {
     margin-top: 26px;
 }
 
+.booking-page-layout {
+    display: grid;
+    gap: 24px;
+    margin-top: 26px;
+}
+
+.booking-summary-panel {
+    display: grid;
+    grid-template-columns: minmax(280px, 0.9fr) minmax(0, 1.1fr);
+    gap: 24px;
+    align-items: stretch;
+}
+
+.booking-room-media {
+    min-height: 300px;
+    border-radius: var(--radius-md);
+    background:
+        linear-gradient(135deg, rgba(13, 58, 86, 0.85), rgba(233, 110, 76, 0.66)),
+        linear-gradient(135deg, #1c455f, #efb08f);
+    background-size: cover;
+    background-position: center;
+}
+
+.booking-room-summary {
+    display: grid;
+    align-content: center;
+}
+
 .profile-grid {
     display: grid;
     grid-template-columns: 0.85fr 1.15fr;
@@ -473,6 +501,12 @@ textarea {
     display: grid;
     gap: 16px;
     margin-top: 22px;
+}
+
+.availability-date-form {
+    display: grid;
+    gap: 12px;
+    margin-bottom: 16px;
 }
 
 .auth-switch,
@@ -551,11 +585,16 @@ textarea {
 }
 
 .slot-choice:hover,
-.slot-choice.is-selected {
+.slot-choice.is-selected,
+.slot-choice.is-in-range {
     border-color: var(--brand);
     background: var(--brand);
     color: white;
     transform: translateY(-1px);
+}
+
+.slot-choice.is-in-range:not(.is-selected) {
+    background: #2f6f93;
 }
 
 .slot-choice small {
@@ -568,6 +607,32 @@ textarea {
     background: rgba(235, 238, 242, 0.8);
     color: var(--muted);
     cursor: not-allowed;
+}
+
+.selected-slot-summary {
+    padding: 12px 14px;
+    border: 1px dashed rgba(13, 58, 86, 0.28);
+    border-radius: var(--radius-sm);
+    background: rgba(215, 229, 239, 0.45);
+    color: var(--muted);
+    font-weight: 700;
+}
+
+.selected-slot-summary.has-selection {
+    border-style: solid;
+    background: var(--brand-soft);
+    color: var(--brand);
+}
+
+.compact-error {
+    margin: 0;
+}
+
+.date-first-field {
+    padding: 16px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.58);
 }
 
 .availability-panel {
@@ -844,7 +909,7 @@ textarea {
 
 .booking-row {
     display: grid;
-    grid-template-columns: 1.5fr 0.8fr 0.9fr 0.7fr 0.5fr;
+    grid-template-columns: 1.4fr 0.75fr 0.85fr 0.7fr 0.85fr;
     gap: 14px;
     align-items: center;
     padding: 16px 0;
@@ -892,6 +957,42 @@ textarea {
 .status-chip-rejected {
     color: #a23232;
     background: rgba(255, 233, 233, 0.85);
+}
+
+.status-chip-cancelled {
+    color: #596977;
+    background: rgba(226, 232, 240, 0.9);
+}
+
+.booking-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.booking-actions form {
+    margin: 0;
+}
+
+.table-action-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 36px;
+    padding: 0 12px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: white;
+    color: var(--brand);
+    cursor: pointer;
+    font: inherit;
+    font-weight: 700;
+}
+
+.table-action-danger {
+    color: #a23232;
+    background: rgba(255, 233, 233, 0.75);
+    border-color: rgba(162, 50, 50, 0.22);
 }
 
 .empty-state {
@@ -966,6 +1067,7 @@ textarea {
     .section-grid,
     .detail-hero,
     .detail-grid,
+    .booking-summary-panel,
     .form-layout,
     .profile-grid,
     .listing-layout,

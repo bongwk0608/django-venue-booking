@@ -55,28 +55,24 @@ class RegistrationForm(UserCreationForm):
 
 class BookingForm(forms.ModelForm):
     booking_date = forms.DateField(
-        widget=forms.DateInput(attrs={"type": "date"}),
+        widget=forms.DateInput(attrs={"type": "hidden"}),
     )
     start_time = forms.TimeField(
-        widget=forms.TimeInput(attrs={"type": "time"}),
+        widget=forms.TimeInput(attrs={"type": "hidden"}),
     )
     end_time = forms.TimeField(
-        widget=forms.TimeInput(attrs={"type": "time"}),
+        widget=forms.TimeInput(attrs={"type": "hidden"}),
     )
 
     class Meta:
         model = Booking
         fields = [
-            "full_name",
-            "email",
             "booking_date",
             "start_time",
             "end_time",
             "purpose",
         ]
         widgets = {
-            "full_name": forms.TextInput(attrs={"placeholder": "Your full name"}),
-            "email": forms.EmailInput(attrs={"placeholder": "name@example.com"}),
             "purpose": forms.Textarea(
                 attrs={"rows": 5, "placeholder": "Describe your event or activity"}
             ),
@@ -86,12 +82,18 @@ class BookingForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.room = room
         self.user = user
-        if user and user.is_authenticated and not self.is_bound:
-            display_name = user.get_full_name() or user.username
-            self.fields["full_name"].initial = display_name
-            self.fields["email"].initial = user.email
         for field in self.fields.values():
             field.widget.attrs.setdefault("class", "form-control")
+
+    def _user_display_name(self):
+        if self.user is None or not self.user.is_authenticated:
+            return ""
+        return self.user.get_full_name() or self.user.username
+
+    def _user_email(self):
+        if self.user is None or not self.user.is_authenticated:
+            return ""
+        return self.user.email
 
     def save(self, commit=True):
         instance = super().save(commit=False)
@@ -99,6 +101,8 @@ class BookingForm(forms.ModelForm):
             instance.room = self.room
         if self.user is not None and self.user.is_authenticated:
             instance.user = self.user
+            instance.full_name = self._user_display_name()
+            instance.email = self._user_email()
         if commit:
             instance.full_clean()
             instance.save()
@@ -109,14 +113,36 @@ class BookingForm(forms.ModelForm):
         if self.errors or self.room is None:
             return cleaned_data
 
+        if not self._user_email():
+            raise forms.ValidationError("Your account needs an email address before you can submit a booking.")
+
+        start_time = cleaned_data.get("start_time")
+        end_time = cleaned_data.get("end_time")
+        if start_time and start_time.minute not in {0, 30}:
+            self.add_error("start_time", "Start time must use a 30-minute interval.")
+        if end_time and end_time.minute not in {0, 30}:
+            self.add_error("end_time", "End time must use a 30-minute interval.")
+        if start_time and end_time:
+            duration_minutes = (
+                end_time.hour * 60
+                + end_time.minute
+                - start_time.hour * 60
+                - start_time.minute
+            )
+            if duration_minutes < 30:
+                self.add_error("end_time", "Please select at least one 30-minute slot.")
+
+        if self.errors:
+            return cleaned_data
+
         candidate = Booking(
             user=self.user if self.user and self.user.is_authenticated else None,
             room=self.room,
-            full_name=cleaned_data.get("full_name", ""),
-            email=cleaned_data.get("email", ""),
+            full_name=self._user_display_name(),
+            email=self._user_email(),
             booking_date=cleaned_data.get("booking_date"),
-            start_time=cleaned_data.get("start_time"),
-            end_time=cleaned_data.get("end_time"),
+            start_time=start_time,
+            end_time=end_time,
             purpose=cleaned_data.get("purpose", ""),
         )
 

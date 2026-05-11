@@ -11,19 +11,25 @@
     </div>
 </section>
 
-<section class="form-layout">
-    <article class="panel summary-panel">
-        <h2>Room summary</h2>
-        <ul class="detail-list">
-            <li>Room: {{ room.name }}</li>
-            <li>Type: {{ room.get_room_type_display }}</li>
-            <li>Capacity: {{ room.capacity }} people</li>
-            <li>Location: {{ room.location }}</li>
-        </ul>
-        <p class="support-note">All successful submissions will be marked as pending until an administrator reviews them.</p>
-        <div class="account-note">
-            <strong>Booking as {{ user.get_full_name|default:user.username }}</strong>
-            <span>{{ user.email|default:"No email saved on this account" }}</span>
+<section class="booking-page-layout">
+    <article class="panel summary-panel booking-summary-panel">
+        <div class="booking-room-media" {% if room.image_url %}style="background-image: linear-gradient(135deg, rgba(13, 58, 86, 0.12), rgba(233, 110, 76, 0.18)), url('{{ room.image_url }}');"{% endif %}></div>
+        <div class="booking-room-summary">
+            <h2>Room summary</h2>
+            <ul class="detail-list">
+                <li>Room: {{ room.name }}</li>
+                <li>Type: {{ room.get_room_type_display }}</li>
+                <li>Capacity: {{ room.capacity }} people</li>
+                <li>Location: {{ room.location }}</li>
+            </ul>
+            <p class="support-note">All successful submissions will be marked as pending until an administrator reviews them.</p>
+            <div class="account-note">
+                <strong>Booking as {{ user.get_full_name|default:user.username }}</strong>
+                <span>{{ user.email|default:"No email saved on this account" }}</span>
+                {% if not user.email %}
+                    <small class="field-error">Please add an email address to your account before submitting a booking.</small>
+                {% endif %}
+            </div>
         </div>
     </article>
 
@@ -38,6 +44,14 @@
             </div>
         {% endif %}
 
+        <form method="get" class="availability-date-form">
+            <label class="field-group date-first-field">
+                <span>Booking date</span>
+                <input type="date" name="date" value="{{ selected_date|date:'Y-m-d' }}" min="{{ today|date:'Y-m-d' }}">
+            </label>
+            <button class="button button-secondary" type="submit">Show Available Slots</button>
+        </form>
+
         <form method="post" class="booking-form" data-min-date="{{ today|date:'Y-m-d' }}">
             {% csrf_token %}
             <section class="slot-picker" aria-label="Available time slots">
@@ -46,13 +60,14 @@
                         <p class="eyebrow">Available times</p>
                         <h3>{{ selected_date|date:"l, d M Y" }}</h3>
                     </div>
-                    <span>Click a 1-hour slot to fill the time fields.</span>
+                    <span>Select one or more consecutive 30-minute slots.</span>
                 </div>
                 <div class="slot-grid">
                     {% for slot in slot_options %}
                         <button
                             class="slot-choice {% if not slot.is_available %}slot-choice-disabled{% endif %}"
                             type="button"
+                            data-index="{{ slot.index }}"
                             data-start="{{ slot.start }}"
                             data-end="{{ slot.end }}"
                             {% if not slot.is_available %}disabled{% endif %}
@@ -62,9 +77,30 @@
                         </button>
                     {% endfor %}
                 </div>
+                <div class="selected-slot-summary" data-empty-text="No time slot selected">
+                    No time slot selected
+                </div>
+                {{ form.start_time }}
+                {{ form.end_time }}
+                {% if form.start_time.errors or form.end_time.errors %}
+                    <div class="error-box compact-error">
+                        {% for error in form.start_time.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                        {% for error in form.end_time.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
             </section>
 
-            {% for field in form %}
+            {{ form.booking_date }}
+            {% if form.booking_date.errors %}
+                <small class="field-error">{{ form.booking_date.errors|join:", " }}</small>
+            {% endif %}
+
+            {% for field in form.visible_fields %}
+                {% if field.name != "booking_date" %}
                 <label class="field-group">
                     <span>{{ field.label }}</span>
                     {{ field }}
@@ -72,6 +108,7 @@
                         <small class="field-error">{{ field.errors|join:", " }}</small>
                     {% endif %}
                 </label>
+                {% endif %}
             {% endfor %}
             <button class="button button-primary" type="submit">Submit Booking Request</button>
         </form>

@@ -13,6 +13,7 @@ from .models import Booking, Room
 TIMELINE_START_HOUR = 8
 TIMELINE_END_HOUR = 22
 TIMELINE_SLOT_MINUTES = 30
+NON_BLOCKING_STATUSES = [Booking.Status.REJECTED, Booking.Status.CANCELLED]
 
 
 def _parse_selected_date(raw_date, fallback_date):
@@ -73,10 +74,11 @@ def _build_booking_slot_options(selected_date, bookings):
     timeline_start = datetime.combine(selected_date, time(hour=TIMELINE_START_HOUR))
     timeline_end = datetime.combine(selected_date, time(hour=TIMELINE_END_HOUR))
     slot_cursor = timeline_start
-    slot_duration = timedelta(hours=1)
+    slot_duration = timedelta(minutes=TIMELINE_SLOT_MINUTES)
     slot_options = []
+    slot_index = 0
 
-    while slot_cursor + slot_duration <= timeline_end:
+    while slot_cursor < timeline_end:
         next_cursor = slot_cursor + slot_duration
         blocking_booking = None
         for booking in bookings:
@@ -88,6 +90,7 @@ def _build_booking_slot_options(selected_date, bookings):
 
         slot_options.append(
             {
+                "index": slot_index,
                 "label": f"{slot_cursor:%H:%M} - {next_cursor:%H:%M}",
                 "start": slot_cursor.strftime("%H:%M"),
                 "end": next_cursor.strftime("%H:%M"),
@@ -96,6 +99,7 @@ def _build_booking_slot_options(selected_date, bookings):
             }
         )
         slot_cursor += timedelta(minutes=TIMELINE_SLOT_MINUTES)
+        slot_index += 1
 
     return slot_options
 
@@ -145,7 +149,7 @@ def room_detail(request, slug):
     room = get_object_or_404(Room, slug=slug)
     today = timezone.localdate()
     first_upcoming_booking_date = (
-        room.bookings.exclude(status=Booking.Status.REJECTED)
+        room.bookings.exclude(status__in=NON_BLOCKING_STATUSES)
         .filter(booking_date__gte=today)
         .order_by("booking_date", "start_time")
         .values_list("booking_date", flat=True)
@@ -154,7 +158,7 @@ def room_detail(request, slug):
     default_date = first_upcoming_booking_date or today
     selected_date = _parse_selected_date(request.GET.get("date"), default_date)
     daily_bookings = list(
-        room.bookings.exclude(status=Booking.Status.REJECTED)
+        room.bookings.exclude(status__in=NON_BLOCKING_STATUSES)
         .filter(booking_date=selected_date)
         .order_by("start_time")
     )
@@ -163,7 +167,7 @@ def room_detail(request, slug):
     pending_slot_count = sum(1 for slot in slots if slot["state"] == "pending")
     approved_slot_count = sum(1 for slot in slots if slot["state"] == "approved")
     upcoming_bookings = (
-        room.bookings.exclude(status=Booking.Status.REJECTED)
+        room.bookings.exclude(status__in=NON_BLOCKING_STATUSES)
         .filter(booking_date__gte=selected_date)
         .order_by("booking_date", "start_time")[:5]
     )
@@ -199,7 +203,7 @@ def _get_recommended_rooms(user):
             return recent_rooms
 
     busy_room_ids = (
-        Booking.objects.exclude(status=Booking.Status.REJECTED)
+        Booking.objects.exclude(status__in=NON_BLOCKING_STATUSES)
         .filter(booking_date__gte=timezone.localdate())
         .values_list("room_id", flat=True)
         .distinct()
@@ -227,25 +231,32 @@ def register(request):
 @login_required
 def profile(request):
     bookings = request.user.bookings.select_related("room").order_by("-booking_date", "-start_time")
+    recent_bookings = list(bookings[:6])
+    for booking in recent_bookings:
+        booking.can_cancel_for_current_user = booking.can_be_cancelled_by(request.user)
     pending_count = bookings.filter(status=Booking.Status.PENDING).count()
     approved_count = bookings.filter(status=Booking.Status.APPROVED).count()
     rejected_count = bookings.filter(status=Booking.Status.REJECTED).count()
+    cancelled_count = bookings.filter(status=Booking.Status.CANCELLED).count()
 
     return render(
         request,
         "booking/profile.html",
         {
-            "bookings": bookings[:6],
+            "bookings": recent_bookings,
             "pending_count": pending_count,
             "approved_count": approved_count,
             "rejected_count": rejected_count,
+            "cancelled_count": cancelled_count,
         },
     )
 
 
 @login_required
 def booking_history(request):
-    bookings = request.user.bookings.select_related("room").order_by("-booking_date", "-start_time")
+    bookings = list(request.user.bookings.select_related("room").order_by("-booking_date", "-start_time"))
+    for booking in bookings:
+        booking.can_cancel_for_current_user = booking.can_be_cancelled_by(request.user)
     return render(request, "booking/booking_history.html", {"bookings": bookings})
 
 
@@ -257,7 +268,7 @@ def booking_create(request, slug):
         timezone.localdate(),
     )
     daily_bookings = list(
-        room.bookings.exclude(status=Booking.Status.REJECTED)
+        room.bookings.exclude(status__in=NON_BLOCKING_STATUSES)
         .filter(booking_date=requested_date)
         .order_by("start_time")
     )
@@ -295,6 +306,28 @@ def booking_confirmation(request, pk):
         "booking/booking_confirmation.html",
         {"booking": booking},
     )
+
+
+@login_required
+def booking_cancel(request, pk):
+    booking = get_object_or_404(Booking, pk=pk)
+    if not request.user.is_staff and booking.user_id != request.user.id:
+        raise PermissionDenied("You can only cancel your own bookings.")
+    if request.method != "POST":
+        return redirect("booking:booking_history")
+
+    if booking.status == Booking.Status.CANCELLED:
+        messages.info(request, "This booking has already been cancelled.")
+    elif booking.status == Booking.Status.REJECTED:
+        messages.info(request, "Rejected bookings do not need to be cancelled.")
+    elif booking.has_started():
+        messages.error(request, "Past bookings cannot be cancelled.")
+    else:
+        booking.status = Booking.Status.CANCELLED
+        booking.save(update_fields=["status"])
+        messages.success(request, "Booking request cancelled successfully.")
+
+    return redirect("booking:booking_history")
 
 
 def about(request):

@@ -12,6 +12,7 @@ urlpatterns = [
     path("rooms/<slug:slug>/", views.room_detail, name="room_detail"),
     path("rooms/<slug:slug>/book/", views.booking_create, name="booking_create"),
     path("bookings/<int:pk>/confirmation/", views.booking_confirmation, name="booking_confirmation"),
+    path("bookings/<int:pk>/cancel/", views.booking_cancel, name="booking_cancel"),
     path("bookings/", views.booking_history, name="booking_history"),
     path("accounts/register/", views.register, name="register"),
     path("accounts/login/", auth_views.LoginView.as_view(template_name="registration/login.html"), name="login"),

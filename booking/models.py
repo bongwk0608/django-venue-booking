@@ -3,6 +3,7 @@ from django.conf import settings
 from django.db import models
 from django.db.models import Q
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.text import slugify
 
 
@@ -43,6 +44,7 @@ class Booking(models.Model):
         PENDING = "pending", "Pending"
         APPROVED = "approved", "Approved"
         REJECTED = "rejected", "Rejected"
+        CANCELLED = "cancelled", "Cancelled"
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -71,6 +73,22 @@ class Booking(models.Model):
     def __str__(self) -> str:
         return f"{self.room.name} - {self.booking_date} ({self.full_name})"
 
+    def starts_at(self):
+        starts_at = timezone.datetime.combine(self.booking_date, self.start_time)
+        return timezone.make_aware(starts_at, timezone.get_current_timezone())
+
+    def has_started(self) -> bool:
+        return self.starts_at() <= timezone.localtime()
+
+    def can_be_cancelled_by(self, user) -> bool:
+        if not user.is_authenticated:
+            return False
+        if not user.is_staff and self.user_id != user.id:
+            return False
+        if self.status in {Booking.Status.CANCELLED, Booking.Status.REJECTED}:
+            return False
+        return not self.has_started()
+
     def clean(self):
         if self.start_time and self.end_time and self.end_time <= self.start_time:
             raise ValidationError("End time must be later than start time.")
@@ -84,7 +102,7 @@ class Booking(models.Model):
         ).exclude(pk=self.pk)
 
         overlapping = overlapping.filter(
-            ~Q(status=Booking.Status.REJECTED),
+            ~Q(status__in=[Booking.Status.REJECTED, Booking.Status.CANCELLED]),
             start_time__lt=self.end_time,
             end_time__gt=self.start_time,
         )
