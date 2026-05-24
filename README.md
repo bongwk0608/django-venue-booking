@@ -39,7 +39,7 @@ PostgreSQL would be a reasonable future upgrade if the system needed multiple co
 Open Docker Desktop first and wait until the Docker engine is running.
 
 ```bash
-docker-compose up --build
+docker compose up --build
 ```
 
 The Docker command runs migrations, loads demo rooms, and starts the Django development server.
@@ -53,7 +53,7 @@ http://localhost:8000
 Create an admin user in a second terminal:
 
 ```bash
-docker-compose exec web python manage.py createsuperuser
+docker compose exec web python manage.py createsuperuser
 ```
 
 Then open:
@@ -104,6 +104,7 @@ Open `http://localhost:8000`.
 - If port 8000 is already used, change the left side of the Docker port mapping, for example `"8001:8000"`.
 - If local Python cannot import Django, run `pip install -r requirements.txt` inside the active virtual environment.
 - If Docker Compose cannot connect to the Docker API, open Docker Desktop first.
+- If `docker-compose` is not found, use the newer Docker Compose v2 command: `docker compose up --build`.
 
 ## Environment Variables
 
