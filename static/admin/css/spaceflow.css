@@ -1,0 +1,944 @@
+/* SpaceFlow admin theme — aligns Django admin with the user-facing site. */
+
+:root,
+html[data-theme="light"],
+html[data-theme="dark"] {
+    --primary: #0d3a56;
+    --secondary: #24597b;
+    --accent: #e96e4c;
+
+    --primary-fg: #ffffff;
+    --header-bg: #0d3a56;
+    --header-color: #ffffff;
+    --header-branding-color: #ffffff;
+    --header-link-color: #ffffff;
+
+    --breadcrumbs-bg: #d7e5ef;
+    --breadcrumbs-fg: #0d3a56;
+    --breadcrumbs-link-fg: #0d3a56;
+
+    --link-fg: #0d3a56;
+    --link-hover-color: #e96e4c;
+    --link-selected-fg: #e96e4c;
+
+    --button-bg: #0d3a56;
+    --button-fg: #ffffff;
+    --button-hover-bg: #24597b;
+    --default-button-bg: #0d3a56;
+    --default-button-hover-bg: #24597b;
+
+    --close-button-bg: #596977;
+    --close-button-hover-bg: #1e2a34;
+    --delete-button-bg: #a23232;
+    --delete-button-hover-bg: #7a1f1f;
+
+    --selected-row: #ffe0d1;
+    --selected-bg: #fff6ef;
+
+    --body-bg: #f4efe6;
+    --body-fg: #1e2a34;
+    --body-quiet-color: #596977;
+    --darkened-bg: #fffdf8;
+    --object-tools-bg: #0d3a56;
+    --object-tools-hover-bg: #24597b;
+}
+
+/* ---------- Top header ---------- */
+html,
+body {
+    background: #f4efe6 !important;
+    background-image: none !important;
+}
+
+body {
+    min-height: 100vh;
+    color: var(--body-fg);
+    font-family: "Avenir Next", "Segoe UI", "Trebuchet MS", sans-serif;
+}
+
+#header {
+    background: linear-gradient(135deg, #0d3a56 0%, #24597b 100%);
+    color: #fff;
+    padding: 14px 32px;
+    border-bottom: 0;
+    box-shadow: 0 14px 30px rgba(13, 58, 86, 0.18);
+}
+
+#header a:link,
+#header a:visited {
+    color: #fff;
+}
+
+.sf-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    text-decoration: none;
+    color: #fff;
+}
+
+.sf-brand-mark {
+    display: inline-grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.16);
+    color: #fff;
+    font-family: Georgia, "Times New Roman", serif;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    backdrop-filter: blur(8px);
+}
+
+.sf-brand-text strong {
+    display: block;
+    font-size: 1.05rem;
+    line-height: 1.1;
+    font-family: Georgia, "Times New Roman", serif;
+    letter-spacing: 0.01em;
+}
+
+.sf-brand-text small {
+    display: block;
+    margin-top: 2px;
+    font-size: 0.78rem;
+    opacity: 0.78;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+}
+
+#branding h1 {
+    margin: 0;
+    padding: 0;
+    font-weight: 400;
+}
+
+.sf-topnav {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.sf-topnav-link {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff !important;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-decoration: none;
+    transition: background 160ms ease, transform 160ms ease;
+}
+
+.sf-topnav-link:hover {
+    background: rgba(255, 255, 255, 0.24);
+    transform: translateY(-1px);
+}
+
+#user-tools {
+    font-size: 0.85rem;
+    letter-spacing: 0.02em;
+}
+
+#user-tools a {
+    border-radius: 999px;
+    padding: 6px 12px;
+    background: rgba(255, 255, 255, 0.12);
+    transition: background 160ms ease;
+}
+
+#user-tools a:hover {
+    background: rgba(255, 255, 255, 0.24);
+    border-bottom: 0;
+}
+
+/* ---------- Breadcrumbs ---------- */
+div.breadcrumbs {
+    background: rgba(215, 229, 239, 0.65);
+    color: #0d3a56;
+    padding: 12px 32px;
+    border-bottom: 1px solid rgba(13, 58, 86, 0.08);
+    font-size: 0.88rem;
+}
+
+div.breadcrumbs a {
+    color: #0d3a56;
+    font-weight: 600;
+}
+
+div.breadcrumbs a:hover {
+    color: #e96e4c;
+}
+
+/* ---------- Module surfaces ---------- */
+#content,
+.dashboard #content {
+    width: min(1680px, calc(100% - 48px));
+    margin: 0 auto;
+    padding: 28px 0 48px;
+}
+
+.module,
+.dashboard .module,
+form .module {
+    border: 1px solid rgba(30, 42, 52, 0.08);
+    border-radius: 20px;
+    overflow: hidden;
+    background: rgba(255, 251, 245, 0.92);
+    box-shadow: 0 18px 40px rgba(38, 36, 31, 0.08);
+    margin-bottom: 24px;
+}
+
+/* Modules that host date/time widgets need overflow:visible so the
+   absolutely-positioned calendar/clock popups aren't clipped. */
+.module:has(.vDateField),
+.module:has(.vTimeField),
+.module:has(.datetimeshortcuts) {
+    overflow: visible;
+}
+
+.module h2,
+.module caption,
+.inline-group h2 {
+    background: linear-gradient(135deg, #0d3a56, #24597b);
+    color: #fff;
+    font-family: Georgia, "Times New Roman", serif;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    padding: 14px 22px;
+    font-size: 1rem;
+    border-bottom: 0;
+    border-radius: 19px 19px 0 0;
+    margin: 0;
+}
+
+.module table {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.module table th,
+.module table td {
+    padding: 14px 18px;
+    border-bottom: 1px solid rgba(30, 42, 52, 0.06);
+    vertical-align: middle;
+}
+
+.module table tr:last-child th,
+.module table tr:last-child td {
+    border-bottom: 0;
+}
+
+.dashboard #content-main .module table tr:last-child th:first-child {
+    border-bottom-left-radius: 19px;
+}
+
+.dashboard #content-main .module table tr:last-child td:last-child {
+    border-bottom-right-radius: 19px;
+}
+
+.dashboard #content-main .module table tr:last-child th:only-child,
+.dashboard #content-main .module table tr:last-child td:only-child {
+    border-bottom-left-radius: 19px;
+    border-bottom-right-radius: 19px;
+}
+
+/* Calendar/clock popups render inside .module — undo the generic table
+   padding/border tweaks so the widget keeps its native compact layout. */
+.calendarbox table,
+.clockbox table {
+    border-collapse: collapse !important;
+    border-spacing: 0 !important;
+}
+
+.calendarbox table th,
+.clockbox table th {
+    padding: 8px 5px !important;
+    border-bottom: 1px solid rgba(30, 42, 52, 0.06) !important;
+}
+
+.calendarbox table td,
+.clockbox table td {
+    padding: 0 !important;
+    border: 0 !important;
+}
+
+.calendarbox table tr:last-child td,
+.clockbox table tr:last-child td {
+    border: 0 !important;
+}
+
+.calendarbox table td a,
+.clockbox table td a {
+    padding: 6px !important;
+}
+
+/* ---------- Headings ---------- */
+#content h1,
+#content-main h1,
+#content .colM h1 {
+    font-family: Georgia, "Times New Roman", serif;
+    font-weight: 600;
+    color: #1e2a34;
+    letter-spacing: -0.01em;
+}
+
+/* ---------- Object tools (Add, History) ---------- */
+.object-tools a:link,
+.object-tools a:visited {
+    border-radius: 999px;
+    padding: 8px 16px;
+    background: #0d3a56;
+    color: #fff;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    box-shadow: 0 10px 22px rgba(13, 58, 86, 0.18);
+    transition: transform 160ms ease, background 160ms ease;
+}
+
+.object-tools a:hover {
+    background: #24597b;
+    transform: translateY(-1px);
+}
+
+.object-tools .addlink {
+    background: #e96e4c;
+    box-shadow: 0 10px 22px rgba(233, 110, 76, 0.28);
+}
+
+.object-tools .addlink:hover {
+    background: #d05a3b;
+}
+
+/* ---------- Buttons / submit row ---------- */
+.button,
+input[type=submit],
+input[type=button],
+.submit-row input,
+a.button {
+    border-radius: 999px !important;
+    padding: 10px 18px !important;
+    border: 0 !important;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    transition: transform 160ms ease, background 160ms ease, box-shadow 160ms ease;
+}
+
+.submit-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 18px 22px;
+    background: rgba(255, 251, 245, 0.92);
+    border: 1px solid rgba(30, 42, 52, 0.08);
+    border-radius: 20px;
+    box-shadow: 0 18px 40px rgba(38, 36, 31, 0.08);
+    margin-top: 22px;
+}
+
+.submit-row input.default {
+    background: #0d3a56;
+    color: #fff;
+    box-shadow: 0 12px 24px rgba(13, 58, 86, 0.22);
+}
+
+.submit-row input.default:hover {
+    background: #24597b;
+    transform: translateY(-1px);
+}
+
+.submit-row input[name="_addanother"],
+.submit-row input[name="_continue"] {
+    background: #d7e5ef;
+    color: #0d3a56;
+}
+
+.submit-row input[name="_addanother"]:hover,
+.submit-row input[name="_continue"]:hover {
+    background: #b8d2e3;
+}
+
+.submit-row a.deletelink {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(162, 50, 50, 0.10);
+    color: #a23232 !important;
+    border-radius: 999px !important;
+    padding: 10px 18px !important;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.submit-row a.deletelink:hover {
+    background: rgba(162, 50, 50, 0.18);
+}
+
+/* ---------- Form fields ---------- */
+.form-row {
+    padding: 14px 22px;
+    border-bottom: 1px solid rgba(30, 42, 52, 0.06);
+}
+
+.form-row:last-child {
+    border-bottom: 0;
+}
+
+input[type=text],
+input[type=password],
+input[type=email],
+input[type=url],
+input[type=number],
+input[type=search],
+input[type=tel],
+input[type=time],
+input[type=date],
+input[type=datetime-local],
+textarea,
+select,
+.vTextField {
+    border-radius: 12px !important;
+    border: 1px solid rgba(30, 42, 52, 0.16) !important;
+    padding: 10px 14px !important;
+    background: #fffdf8 !important;
+    transition: border-color 160ms ease, box-shadow 160ms ease;
+    box-sizing: border-box;
+    line-height: 1.4;
+}
+
+input[type=text],
+input[type=password],
+input[type=email],
+input[type=url],
+input[type=number],
+input[type=search],
+input[type=tel],
+input[type=time],
+input[type=date],
+input[type=datetime-local],
+.vTextField {
+    min-height: 42px;
+}
+
+html body select,
+html body .vSelect {
+    min-height: 42px !important;
+    padding: 8px 40px 8px 14px !important;
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMiA4IiBmaWxsPSJub25lIj48cGF0aCBkPSJNMSAxLjVMNiA2LjVMMTEgMS41IiBzdHJva2U9IiMwZDNhNTYiIHN0cm9rZS13aWR0aD0iMi4yIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48L3N2Zz4=") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 14px center !important;
+    background-size: 14px 9px !important;
+    background-color: #fffdf8 !important;
+    cursor: pointer;
+}
+
+html body select:hover {
+    border-color: #0d3a56 !important;
+}
+
+html body select[multiple] {
+    background-image: none !important;
+    padding: 8px 14px !important;
+    min-height: 120px !important;
+    cursor: auto;
+}
+
+input[type=text]:focus,
+input[type=password]:focus,
+input[type=email]:focus,
+input[type=url]:focus,
+input[type=number]:focus,
+input[type=search]:focus,
+input[type=tel]:focus,
+input[type=time]:focus,
+input[type=date]:focus,
+input[type=datetime-local]:focus,
+textarea:focus,
+select:focus,
+.vTextField:focus {
+    outline: none;
+    border-color: #0d3a56 !important;
+    box-shadow: 0 0 0 4px rgba(13, 58, 86, 0.12);
+}
+
+/* ---------- Sidebar (filters) ---------- */
+#changelist .actions {
+    background: rgba(255, 251, 245, 0.92);
+    border: 1px solid rgba(30, 42, 52, 0.08);
+    border-radius: 16px;
+    padding: 12px 18px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#changelist-filter {
+    background: rgba(255, 251, 245, 0.94);
+    border: 1px solid rgba(30, 42, 52, 0.08);
+    border-radius: 20px;
+    padding: 0;
+    margin-left: 18px;
+    overflow: hidden;
+    box-shadow: 0 18px 40px rgba(38, 36, 31, 0.08);
+}
+
+#changelist-filter h2 {
+    background: linear-gradient(135deg, #0d3a56, #24597b);
+    color: #fff;
+    padding: 14px 18px;
+    font-family: Georgia, "Times New Roman", serif;
+    font-weight: 600;
+    margin: 0;
+    border-bottom: 0;
+    font-size: 0.95rem;
+    letter-spacing: 0.02em;
+}
+
+#changelist-filter h3 {
+    padding: 12px 18px 4px;
+    color: #1e2a34;
+    font-size: 0.85rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+#changelist-filter ul {
+    padding: 0 12px 12px;
+}
+
+#changelist-filter li.selected a {
+    color: #e96e4c;
+    font-weight: 700;
+}
+
+#changelist-filter a {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    color: #1e2a34;
+}
+
+#changelist-filter a:hover {
+    background: #d7e5ef;
+    color: #0d3a56;
+}
+
+/* ---------- Tables ---------- */
+#changelist table thead th {
+    background: rgba(215, 229, 239, 0.5);
+    color: #0d3a56;
+    text-transform: uppercase;
+    font-size: 0.74rem;
+    letter-spacing: 0.1em;
+    padding: 14px 18px;
+    border-bottom: 1px solid rgba(13, 58, 86, 0.1);
+}
+
+#changelist table tbody tr:hover td {
+    background: rgba(255, 224, 209, 0.32);
+}
+
+#changelist .row1,
+#changelist .row2 {
+    background: transparent;
+}
+
+/* ---------- Custom pills & buttons (used by ModelAdmin display callables) ---------- */
+.sf-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border: 1px solid rgba(30, 42, 52, 0.06);
+    white-space: nowrap;
+}
+
+.sf-muted {
+    display: block;
+    margin-top: 2px;
+    color: #596977;
+    font-size: 0.82rem;
+}
+
+.sf-mono {
+    font-variant-numeric: tabular-nums;
+    color: #1e2a34;
+    font-weight: 600;
+}
+
+.sf-room-link {
+    display: inline-flex;
+    flex-direction: column;
+    color: #0d3a56;
+    text-decoration: none;
+    line-height: 1.3;
+}
+
+.sf-room-link:hover strong {
+    color: #e96e4c;
+}
+
+.sf-actions {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.sf-inline-form {
+    display: inline;
+    margin: 0;
+}
+
+.sf-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    cursor: pointer;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #fff;
+    transition: transform 140ms ease, box-shadow 140ms ease, background 140ms ease;
+}
+
+.sf-btn:hover {
+    transform: translateY(-1px);
+}
+
+.sf-btn-approve {
+    background: #2f8b57;
+    box-shadow: 0 6px 14px rgba(47, 139, 87, 0.24);
+}
+
+.sf-btn-approve:hover {
+    background: #25754a;
+}
+
+.sf-btn-reject {
+    background: #a23232;
+    box-shadow: 0 6px 14px rgba(162, 50, 50, 0.24);
+}
+
+.sf-btn-reject:hover {
+    background: #831f1f;
+}
+
+.sf-btn-cancel {
+    background: #596977;
+    box-shadow: 0 6px 14px rgba(89, 105, 119, 0.22);
+}
+
+.sf-btn-cancel:hover {
+    background: #3f4d5a;
+}
+
+/* ---------- Messages ---------- */
+ul.messagelist li {
+    border-radius: 14px;
+    padding: 14px 20px;
+    box-shadow: 0 12px 26px rgba(38, 36, 31, 0.08);
+    font-weight: 600;
+}
+
+ul.messagelist li.success {
+    background: #dff4e6;
+    color: #1f6f45;
+    border-left: 4px solid #2f8b57;
+}
+
+ul.messagelist li.warning {
+    background: #ffe2d7;
+    color: #a85731;
+    border-left: 4px solid #e96e4c;
+}
+
+ul.messagelist li.error {
+    background: #ffe9e9;
+    color: #a23232;
+    border-left: 4px solid #a23232;
+}
+
+/* ---------- Login page ---------- */
+.login #container {
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 24px 60px rgba(38, 36, 31, 0.18);
+    background: rgba(255, 251, 245, 0.96);
+    border: 1px solid rgba(30, 42, 52, 0.08);
+}
+
+.login #header {
+    border-radius: 0;
+}
+
+.login .form-row {
+    padding: 14px 24px;
+}
+
+.login .form-row:last-of-type {
+    border-bottom: 0;
+}
+
+.login .submit-row {
+    display: block;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    margin: 0;
+    padding: 8px 24px 24px;
+    text-align: center;
+}
+
+.login .submit-row input[type=submit] {
+    display: block;
+    width: 100%;
+    min-height: 46px;
+    background: #0d3a56 !important;
+    color: #ffffff !important;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    box-shadow: 0 12px 24px rgba(13, 58, 86, 0.22);
+}
+
+.login .submit-row input[type=submit]:hover,
+.login .submit-row input[type=submit]:focus {
+    background: #24597b !important;
+}
+
+.login .password-reset-link {
+    padding: 0 24px 22px;
+    text-align: center;
+}
+
+.login .password-reset-link a {
+    color: #0d3a56;
+    font-weight: 600;
+}
+
+/* ---------- Pagination ---------- */
+.paginator {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    padding: 14px 4px;
+    color: #596977;
+}
+
+.paginator a,
+.paginator .this-page {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    padding: 0 12px;
+    background: #fff;
+    color: #0d3a56;
+    border: 1px solid rgba(30, 42, 52, 0.08);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.paginator a:hover {
+    background: #d7e5ef;
+}
+
+.paginator .this-page {
+    background: #0d3a56;
+    color: #fff;
+    border-color: transparent;
+}
+
+/* ---------- Selector widgets ---------- */
+.selector-chosen h2,
+.selector-available h2 {
+    background: linear-gradient(135deg, #0d3a56, #24597b);
+    color: #fff;
+    border-radius: 12px 12px 0 0;
+}
+
+/* ---------- Dashboard layout balance ---------- */
+/* Two-half layout: Auth + Booking stacked in the left column, Recent actions
+   takes the full right column. Replace Django's float-based colMS with a
+   grid so the right side stops being a 300px sidebar. */
+.dashboard .colMS {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 28px;
+    align-items: start;
+    margin-right: 0;
+}
+
+.dashboard .colMS > h1 {
+    grid-column: 1 / -1;
+    margin: 0;
+}
+
+.dashboard #content-main {
+    float: none;
+    width: auto;
+    min-width: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 22px;
+}
+
+.dashboard #content-main .module {
+    margin-bottom: 0;
+}
+
+.dashboard #content-related {
+    float: none;
+    width: auto;
+    margin: 0;
+}
+
+@media (max-width: 960px) {
+    .dashboard .colMS {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ---------- Recent actions sidebar (admin dashboard) ---------- */
+#content-related {
+    background: transparent;
+}
+
+#content-related .module {
+    background: rgba(255, 251, 245, 0.94);
+    border: 1px solid rgba(30, 42, 52, 0.08);
+    border-radius: 20px;
+    box-shadow: 0 18px 40px rgba(38, 36, 31, 0.08);
+    overflow: hidden;
+    margin-bottom: 24px;
+}
+
+#content-related .module h2 {
+    background: linear-gradient(135deg, #0d3a56, #24597b);
+    color: #fff;
+    font-family: Georgia, "Times New Roman", serif;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    padding: 14px 22px;
+    font-size: 1rem;
+    border-bottom: 0;
+    margin: 0;
+}
+
+#content-related h3 {
+    padding: 16px 22px 6px;
+    margin: 0;
+    color: #596977;
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+#content-related .actionlist {
+    padding: 0;
+    margin: 6px 16px 18px;
+    list-style: none;
+}
+
+#content-related .actionlist li {
+    position: relative;
+    list-style: none;
+    margin: 0 0 8px;
+    padding: 12px 14px 12px 40px;
+    line-height: 1.4;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(30, 42, 52, 0.06);
+    background-repeat: no-repeat;
+    background-position: 14px 14px;
+    background-size: 16px 16px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#content-related .actionlist li.addlink {
+    background-image: url("../img/icon-addlink.svg");
+}
+
+#content-related .actionlist li.changelink {
+    background-image: url("../img/icon-changelink.svg");
+}
+
+#content-related .actionlist li.deletelink {
+    background-image: url("../img/icon-deletelink.svg");
+}
+
+#content-related .actionlist li a {
+    color: #0d3a56;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+#content-related .actionlist li a:hover {
+    color: #e96e4c;
+}
+
+#content-related .actionlist li br {
+    display: none;
+}
+
+#content-related .actionlist li .mini.quiet {
+    display: block;
+    margin-top: 4px;
+    color: #596977;
+    font-size: 0.74rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+#content-related .actionlist li .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+#content-related p {
+    padding: 0 22px 18px;
+    color: #596977;
+}
+
+/* ---------- Footer trim ---------- */
+#footer {
+    background: transparent;
+    color: #596977;
+    padding: 24px 32px;
+    text-align: center;
+}
