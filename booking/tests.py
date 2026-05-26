@@ -1,4 +1,4 @@
-from datetime import date, time, timedelta
+from datetime import time, timedelta
 
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
@@ -7,6 +7,14 @@ from django.urls import reverse
 from django.utils import timezone
 
 from .models import Booking, Room
+
+
+def future_date(days=7):
+    return timezone.localdate() + timedelta(days=days)
+
+
+def past_date(days=7):
+    return timezone.localdate() - timedelta(days=days)
 
 
 class BookingModelTests(TestCase):
@@ -19,13 +27,14 @@ class BookingModelTests(TestCase):
             short_description="A test room.",
             description="A classroom used for automated tests.",
         )
+        self.target_date = future_date()
 
     def test_end_time_must_be_after_start_time(self):
         booking = Booking(
             room=self.room,
             full_name="Student One",
             email="student@example.com",
-            booking_date=date(2026, 5, 12),
+            booking_date=self.target_date,
             start_time=time(10, 0),
             end_time=time(9, 0),
             purpose="Tutorial",
@@ -39,7 +48,7 @@ class BookingModelTests(TestCase):
             room=self.room,
             full_name="Student One",
             email="student@example.com",
-            booking_date=date(2026, 5, 12),
+            booking_date=self.target_date,
             start_time=time(10, 0),
             end_time=time(11, 0),
             purpose="Tutorial",
@@ -49,7 +58,7 @@ class BookingModelTests(TestCase):
             room=self.room,
             full_name="Student Two",
             email="student2@example.com",
-            booking_date=date(2026, 5, 12),
+            booking_date=self.target_date,
             start_time=time(10, 30),
             end_time=time(11, 30),
             purpose="Workshop",
@@ -63,7 +72,7 @@ class BookingModelTests(TestCase):
             room=self.room,
             full_name="Student One",
             email="student@example.com",
-            booking_date=date(2026, 5, 12),
+            booking_date=self.target_date,
             start_time=time(10, 0),
             end_time=time(11, 0),
             purpose="Tutorial",
@@ -73,7 +82,7 @@ class BookingModelTests(TestCase):
             room=self.room,
             full_name="Student Two",
             email="student2@example.com",
-            booking_date=date(2026, 5, 12),
+            booking_date=self.target_date,
             start_time=time(10, 30),
             end_time=time(11, 30),
             purpose="Workshop",
@@ -86,7 +95,7 @@ class BookingModelTests(TestCase):
             room=self.room,
             full_name="Student One",
             email="student@example.com",
-            booking_date=date(2026, 5, 12),
+            booking_date=self.target_date,
             start_time=time(10, 0),
             end_time=time(11, 0),
             purpose="Tutorial",
@@ -96,7 +105,7 @@ class BookingModelTests(TestCase):
             room=self.room,
             full_name="Student Two",
             email="student2@example.com",
-            booking_date=date(2026, 5, 12),
+            booking_date=self.target_date,
             start_time=time(10, 30),
             end_time=time(11, 30),
             purpose="Workshop",
@@ -129,6 +138,34 @@ class BookingModelTests(TestCase):
         self.assertFalse(future_booking.has_started())
         self.assertTrue(past_booking.has_started())
 
+    def test_model_clean_rejects_before_open_hour(self):
+        booking = Booking(
+            room=self.room,
+            full_name="Student One",
+            email="student@example.com",
+            booking_date=self.target_date,
+            start_time=time(7, 0),
+            end_time=time(8, 30),
+            purpose="Tutorial",
+        )
+
+        with self.assertRaises(ValidationError):
+            booking.clean()
+
+    def test_model_clean_rejects_after_close_hour(self):
+        booking = Booking(
+            room=self.room,
+            full_name="Student One",
+            email="student@example.com",
+            booking_date=self.target_date,
+            start_time=time(21, 30),
+            end_time=time(22, 30),
+            purpose="Tutorial",
+        )
+
+        with self.assertRaises(ValidationError):
+            booking.clean()
+
 
 class BookingAuthViewTests(TestCase):
     def setUp(self):
@@ -158,6 +195,7 @@ class BookingAuthViewTests(TestCase):
             short_description="A demo hall.",
             description="A hall used for view tests.",
         )
+        self.target_date = future_date()
 
     def test_anonymous_user_can_browse_rooms(self):
         response = self.client.get(reverse("booking:room_list"))
@@ -175,7 +213,7 @@ class BookingAuthViewTests(TestCase):
         response = self.client.post(
             reverse("booking:booking_create", args=[self.room.slug]),
             {
-                "booking_date": "2026-05-12",
+                "booking_date": self.target_date.isoformat(),
                 "start_time": "10:00",
                 "end_time": "11:00",
                 "purpose": "Group study",
@@ -195,7 +233,7 @@ class BookingAuthViewTests(TestCase):
             {
                 "full_name": "Fake Person",
                 "email": "fake@example.com",
-                "booking_date": "2026-05-12",
+                "booking_date": self.target_date.isoformat(),
                 "start_time": "10:00",
                 "end_time": "11:00",
                 "purpose": "Group study",
@@ -216,7 +254,7 @@ class BookingAuthViewTests(TestCase):
         response = self.client.post(
             reverse("booking:booking_create", args=[self.room.slug]),
             {
-                "booking_date": "2026-05-12",
+                "booking_date": self.target_date.isoformat(),
                 "start_time": "10:00",
                 "end_time": "11:00",
                 "purpose": "Group study",
@@ -232,7 +270,7 @@ class BookingAuthViewTests(TestCase):
         response = self.client.post(
             reverse("booking:booking_create", args=[self.room.slug]),
             {
-                "booking_date": "2026-05-12",
+                "booking_date": self.target_date.isoformat(),
                 "start_time": "09:10",
                 "end_time": "10:00",
                 "purpose": "Group study",
@@ -248,7 +286,7 @@ class BookingAuthViewTests(TestCase):
         response = self.client.post(
             reverse("booking:booking_create", args=[self.room.slug]),
             {
-                "booking_date": "2026-05-12",
+                "booking_date": self.target_date.isoformat(),
                 "start_time": "09:00",
                 "end_time": "09:00",
                 "purpose": "Group study",
@@ -258,11 +296,60 @@ class BookingAuthViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(Booking.objects.count(), 0)
 
+    def test_booking_rejects_past_date(self):
+        self.client.login(username="student", password="pass12345")
+        response = self.client.post(
+            reverse("booking:booking_create", args=[self.room.slug]),
+            {
+                "booking_date": past_date().isoformat(),
+                "start_time": "10:00",
+                "end_time": "11:00",
+                "purpose": "Group study",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Booking date must be today or later.")
+        self.assertEqual(Booking.objects.count(), 0)
+
+    def test_booking_rejects_start_before_open_hour(self):
+        self.client.login(username="student", password="pass12345")
+        response = self.client.post(
+            reverse("booking:booking_create", args=[self.room.slug]),
+            {
+                "booking_date": self.target_date.isoformat(),
+                "start_time": "07:00",
+                "end_time": "08:30",
+                "purpose": "Group study",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Bookings must start at or after 08:00.")
+        self.assertEqual(Booking.objects.count(), 0)
+
+    def test_booking_rejects_end_after_close_hour(self):
+        self.client.login(username="student", password="pass12345")
+        response = self.client.post(
+            reverse("booking:booking_create", args=[self.room.slug]),
+            {
+                "booking_date": self.target_date.isoformat(),
+                "start_time": "21:30",
+                "end_time": "22:30",
+                "purpose": "Group study",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Bookings must end at or before 22:00.")
+        self.assertEqual(Booking.objects.count(), 0)
+
     def test_booking_form_shows_30_minute_slots(self):
         self.client.login(username="student", password="pass12345")
 
         response = self.client.get(
-            f"{reverse('booking:booking_create', args=[self.room.slug])}?date=2026-05-12"
+            f"{reverse('booking:booking_create', args=[self.room.slug])}"
+            f"?date={self.target_date.isoformat()}"
         )
         content = response.content.decode()
 
@@ -280,7 +367,7 @@ class BookingAuthViewTests(TestCase):
             room=self.room,
             full_name="Other",
             email="other@example.com",
-            booking_date=date(2026, 5, 12),
+            booking_date=self.target_date,
             start_time=time(10, 0),
             end_time=time(11, 0),
             purpose="Workshop",
@@ -297,7 +384,7 @@ class BookingAuthViewTests(TestCase):
             room=self.room,
             full_name="Other",
             email="other@example.com",
-            booking_date=date(2026, 5, 12),
+            booking_date=self.target_date,
             start_time=time(10, 0),
             end_time=time(11, 0),
             purpose="Workshop",
@@ -314,7 +401,7 @@ class BookingAuthViewTests(TestCase):
             room=self.room,
             full_name="Student",
             email="student@example.com",
-            booking_date=date(2026, 5, 12),
+            booking_date=self.target_date,
             start_time=time(10, 0),
             end_time=time(11, 0),
             purpose="Workshop",
@@ -334,7 +421,7 @@ class BookingAuthViewTests(TestCase):
             room=self.room,
             full_name="Student",
             email="student@example.com",
-            booking_date=date(2020, 5, 12),
+            booking_date=past_date(),
             start_time=time(10, 0),
             end_time=time(11, 0),
             purpose="Workshop",
@@ -354,7 +441,7 @@ class BookingAuthViewTests(TestCase):
             room=self.room,
             full_name="Student",
             email="student@example.com",
-            booking_date=date(2020, 5, 12),
+            booking_date=past_date(),
             start_time=time(10, 0),
             end_time=time(11, 0),
             purpose="Workshop",
@@ -374,7 +461,7 @@ class BookingAuthViewTests(TestCase):
             room=self.room,
             full_name="Other",
             email="other@example.com",
-            booking_date=date(2026, 5, 12),
+            booking_date=self.target_date,
             start_time=time(10, 0),
             end_time=time(11, 0),
             purpose="Workshop",
@@ -386,3 +473,88 @@ class BookingAuthViewTests(TestCase):
 
         self.assertEqual(response.status_code, 403)
         self.assertEqual(booking.status, Booking.Status.PENDING)
+
+
+class AdminBookingActionTests(TestCase):
+    def setUp(self):
+        self.admin = User.objects.create_user(
+            username="admin",
+            email="admin@example.com",
+            password="pass12345",
+            is_staff=True,
+            is_superuser=True,
+        )
+        self.user = User.objects.create_user(
+            username="student",
+            email="student@example.com",
+            password="pass12345",
+        )
+        self.room = Room.objects.create(
+            name="Admin Test Room",
+            room_type=Room.RoomType.HALL,
+            capacity=40,
+            location="Main",
+            short_description="Admin test.",
+            description="Admin test.",
+        )
+        self.target_date = future_date()
+        self.client.login(username="admin", password="pass12345")
+
+    def _make_booking(self, start, end, status=Booking.Status.PENDING):
+        return Booking.objects.create(
+            user=self.user,
+            room=self.room,
+            full_name="Student",
+            email="student@example.com",
+            booking_date=self.target_date,
+            start_time=start,
+            end_time=end,
+            purpose="Test",
+            status=status,
+        )
+
+    def test_quick_approve_changes_status(self):
+        booking = self._make_booking(time(10, 0), time(11, 0))
+
+        response = self.client.post(reverse("admin:booking_booking_approve", args=[booking.pk]))
+        booking.refresh_from_db()
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(booking.status, Booking.Status.APPROVED)
+
+    def test_quick_approve_rejects_conflicting_booking(self):
+        first = self._make_booking(time(10, 0), time(11, 0), status=Booking.Status.APPROVED)
+        second = self._make_booking(time(10, 30), time(11, 30))
+
+        response = self.client.post(reverse("admin:booking_booking_approve", args=[second.pk]))
+
+        first.refresh_from_db()
+        second.refresh_from_db()
+        self.assertEqual(first.status, Booking.Status.APPROVED)
+        self.assertEqual(second.status, Booking.Status.PENDING)
+        self.assertEqual(response.status_code, 302)
+
+    def test_quick_action_requires_post(self):
+        booking = self._make_booking(time(10, 0), time(11, 0))
+
+        response = self.client.get(reverse("admin:booking_booking_approve", args=[booking.pk]))
+        booking.refresh_from_db()
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(booking.status, Booking.Status.PENDING)
+
+    def test_bulk_approve_skips_conflicts(self):
+        self._make_booking(time(10, 0), time(11, 0), status=Booking.Status.APPROVED)
+        second = self._make_booking(time(10, 30), time(11, 30))
+
+        response = self.client.post(
+            reverse("admin:booking_booking_changelist"),
+            {
+                "action": "approve_bookings",
+                "_selected_action": [str(second.pk)],
+            },
+        )
+
+        second.refresh_from_db()
+        self.assertEqual(second.status, Booking.Status.PENDING)
+        self.assertEqual(response.status_code, 302)
