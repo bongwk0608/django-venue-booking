@@ -8,11 +8,17 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
 from .forms import BookingForm, RegistrationForm, RoomFilterForm
-from .models import Booking, Room
+from .models import (
+    BOOKING_CLOSE_HOUR,
+    BOOKING_OPEN_HOUR,
+    BOOKING_SLOT_MINUTES,
+    Booking,
+    Room,
+)
 
-TIMELINE_START_HOUR = 8
-TIMELINE_END_HOUR = 22
-TIMELINE_SLOT_MINUTES = 30
+TIMELINE_START_HOUR = BOOKING_OPEN_HOUR
+TIMELINE_END_HOUR = BOOKING_CLOSE_HOUR
+TIMELINE_SLOT_MINUTES = BOOKING_SLOT_MINUTES
 NON_BLOCKING_STATUSES = [Booking.Status.REJECTED, Booking.Status.CANCELLED]
 
 

@@ -1,3 +1,5 @@
+from datetime import time
+
 from django.core.exceptions import ValidationError
 from django.conf import settings
 from django.db import models
@@ -5,6 +7,11 @@ from django.db.models import Q
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.text import slugify
+
+
+BOOKING_OPEN_HOUR = 8
+BOOKING_CLOSE_HOUR = 22
+BOOKING_SLOT_MINUTES = 30
 
 
 class Room(models.Model):
@@ -90,8 +97,31 @@ class Booking(models.Model):
         return not self.has_started()
 
     def clean(self):
+        errors = {}
+
         if self.start_time and self.end_time and self.end_time <= self.start_time:
-            raise ValidationError("End time must be later than start time.")
+            errors["end_time"] = "End time must be later than start time."
+
+        open_time = time(BOOKING_OPEN_HOUR, 0)
+        close_time = time(BOOKING_CLOSE_HOUR, 0)
+        if self.start_time and self.start_time < open_time:
+            errors.setdefault(
+                "start_time",
+                f"Bookings must start at or after {open_time.strftime('%H:%M')}.",
+            )
+        if self.end_time and self.end_time > close_time:
+            errors.setdefault(
+                "end_time",
+                f"Bookings must end at or before {close_time.strftime('%H:%M')}.",
+            )
+
+        if self.start_time and self.start_time.minute % BOOKING_SLOT_MINUTES != 0:
+            errors.setdefault("start_time", "Start time must align with a 30-minute slot.")
+        if self.end_time and self.end_time.minute % BOOKING_SLOT_MINUTES != 0:
+            errors.setdefault("end_time", "End time must align with a 30-minute slot.")
+
+        if errors:
+            raise ValidationError(errors)
 
         if not all([self.room_id, self.booking_date, self.start_time, self.end_time]):
             return

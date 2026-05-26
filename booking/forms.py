@@ -1,9 +1,19 @@
+from datetime import time
+
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from django.db import transaction
+from django.utils import timezone
 
-from .models import Booking, Room
+from .models import (
+    BOOKING_CLOSE_HOUR,
+    BOOKING_OPEN_HOUR,
+    BOOKING_SLOT_MINUTES,
+    Booking,
+    Room,
+)
 
 
 class RoomFilterForm(forms.Form):
@@ -104,8 +114,9 @@ class BookingForm(forms.ModelForm):
             instance.full_name = self._user_display_name()
             instance.email = self._user_email()
         if commit:
-            instance.full_clean()
-            instance.save()
+            with transaction.atomic():
+                instance.full_clean()
+                instance.save()
         return instance
 
     def clean(self):
@@ -116,12 +127,29 @@ class BookingForm(forms.ModelForm):
         if not self._user_email():
             raise forms.ValidationError("Your account needs an email address before you can submit a booking.")
 
+        booking_date = cleaned_data.get("booking_date")
+        if booking_date and booking_date < timezone.localdate():
+            self.add_error("booking_date", "Booking date must be today or later.")
+
         start_time = cleaned_data.get("start_time")
         end_time = cleaned_data.get("end_time")
-        if start_time and start_time.minute not in {0, 30}:
+        open_time = time(BOOKING_OPEN_HOUR, 0)
+        close_time = time(BOOKING_CLOSE_HOUR, 0)
+
+        if start_time and start_time.minute % BOOKING_SLOT_MINUTES != 0:
             self.add_error("start_time", "Start time must use a 30-minute interval.")
-        if end_time and end_time.minute not in {0, 30}:
+        if end_time and end_time.minute % BOOKING_SLOT_MINUTES != 0:
             self.add_error("end_time", "End time must use a 30-minute interval.")
+        if start_time and start_time < open_time:
+            self.add_error(
+                "start_time",
+                f"Bookings must start at or after {open_time.strftime('%H:%M')}.",
+            )
+        if end_time and end_time > close_time:
+            self.add_error(
+                "end_time",
+                f"Bookings must end at or before {close_time.strftime('%H:%M')}.",
+            )
         if start_time and end_time:
             duration_minutes = (
                 end_time.hour * 60
@@ -129,7 +157,7 @@ class BookingForm(forms.ModelForm):
                 - start_time.hour * 60
                 - start_time.minute
             )
-            if duration_minutes < 30:
+            if duration_minutes < BOOKING_SLOT_MINUTES:
                 self.add_error("end_time", "Please select at least one 30-minute slot.")
 
         if self.errors:
@@ -140,7 +168,7 @@ class BookingForm(forms.ModelForm):
             room=self.room,
             full_name=self._user_display_name(),
             email=self._user_email(),
-            booking_date=cleaned_data.get("booking_date"),
+            booking_date=booking_date,
             start_time=start_time,
             end_time=end_time,
             purpose=cleaned_data.get("purpose", ""),
