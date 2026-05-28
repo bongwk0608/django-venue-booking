@@ -5,6 +5,7 @@ from django.http import Http404
 from django.shortcuts import redirect
 from django.urls import path, reverse
 from django.utils.html import format_html
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.safestring import mark_safe
 
 from .models import Booking, Room
@@ -244,10 +245,14 @@ class BookingAdmin(admin.ModelAdmin):
                 messages.ERROR,
             )
 
-        return redirect(
-            request.META.get("HTTP_REFERER")
-            or reverse("admin:booking_booking_changelist")
-        )
+        referer = request.META.get("HTTP_REFERER")
+        if referer and url_has_allowed_host_and_scheme(
+            referer,
+            allowed_hosts={request.get_host()},
+            require_https=request.is_secure(),
+        ):
+            return redirect(referer)
+        return redirect(reverse("admin:booking_booking_changelist"))
 
     def handle_approve(self, request, pk):
         return self._set_status(request, pk, Booking.Status.APPROVED, "Approved", messages.SUCCESS)

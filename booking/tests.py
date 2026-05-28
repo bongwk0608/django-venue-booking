@@ -1,4 +1,5 @@
-from datetime import time, timedelta
+from datetime import datetime, time, timedelta
+from unittest.mock import patch
 
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
@@ -167,6 +168,38 @@ class BookingModelTests(TestCase):
             booking.clean()
 
 
+class RoomSlugTests(TestCase):
+    def test_duplicate_room_names_get_unique_slugs(self):
+        first = Room.objects.create(
+            name="Conference A",
+            room_type=Room.RoomType.CONFERENCE,
+            capacity=10,
+            location="Block A",
+            short_description="First.",
+            description="First conference room.",
+        )
+        second = Room.objects.create(
+            name="Conference A",
+            room_type=Room.RoomType.CONFERENCE,
+            capacity=10,
+            location="Block A",
+            short_description="Second.",
+            description="Second conference room.",
+        )
+        third = Room.objects.create(
+            name="Conference A",
+            room_type=Room.RoomType.CONFERENCE,
+            capacity=10,
+            location="Block A",
+            short_description="Third.",
+            description="Third conference room.",
+        )
+
+        self.assertEqual(first.slug, "conference-a")
+        self.assertEqual(second.slug, "conference-a-2")
+        self.assertEqual(third.slug, "conference-a-3")
+
+
 class BookingAuthViewTests(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(
@@ -326,6 +359,31 @@ class BookingAuthViewTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Bookings must start at or after 08:00.")
+        self.assertEqual(Booking.objects.count(), 0)
+
+    def test_booking_rejects_past_time_on_today(self):
+        self.client.login(username="student", password="pass12345")
+        today = timezone.localdate()
+        frozen_now = timezone.make_aware(
+            datetime.combine(today, time(14, 0)),
+            timezone.get_current_timezone(),
+        )
+
+        with patch("booking.forms.timezone.localtime", return_value=frozen_now), \
+             patch("booking.forms.timezone.localdate", return_value=today), \
+             patch("booking.models.timezone.localtime", return_value=frozen_now):
+            response = self.client.post(
+                reverse("booking:booking_create", args=[self.room.slug]),
+                {
+                    "booking_date": today.isoformat(),
+                    "start_time": "09:00",
+                    "end_time": "10:00",
+                    "purpose": "Group study",
+                },
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Start time cannot be in the past.")
         self.assertEqual(Booking.objects.count(), 0)
 
     def test_booking_rejects_end_after_close_hour(self):
@@ -542,6 +600,19 @@ class AdminBookingActionTests(TestCase):
 
         self.assertEqual(response.status_code, 302)
         self.assertEqual(booking.status, Booking.Status.PENDING)
+
+    def test_quick_action_ignores_external_referer(self):
+        booking = self._make_booking(time(10, 0), time(11, 0))
+
+        response = self.client.post(
+            reverse("admin:booking_booking_approve", args=[booking.pk]),
+            HTTP_REFERER="https://evil.example.com/admin/",
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(
+            response["Location"], reverse("admin:booking_booking_changelist")
+        )
 
     def test_bulk_approve_skips_conflicts(self):
         self._make_booking(time(10, 0), time(11, 0), status=Booking.Status.APPROVED)
