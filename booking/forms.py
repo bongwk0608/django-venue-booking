@@ -115,6 +115,12 @@ class BookingForm(forms.ModelForm):
             instance.email = self._user_email()
         if commit:
             with transaction.atomic():
+                list(
+                    Booking.objects.select_for_update().filter(
+                        room=instance.room,
+                        booking_date=instance.booking_date,
+                    )
+                )
                 instance.full_clean()
                 instance.save()
         return instance
@@ -159,6 +165,10 @@ class BookingForm(forms.ModelForm):
             )
             if duration_minutes < BOOKING_SLOT_MINUTES:
                 self.add_error("end_time", "Please select at least one 30-minute slot.")
+
+        if start_time and booking_date and booking_date == timezone.localdate():
+            if start_time <= timezone.localtime().time():
+                self.add_error("start_time", "Start time cannot be in the past.")
 
         if self.errors:
             return cleaned_data

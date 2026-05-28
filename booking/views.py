@@ -3,7 +3,7 @@ from datetime import datetime, time, timedelta
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
@@ -283,9 +283,13 @@ def booking_create(request, slug):
     if request.method == "POST":
         form = BookingForm(request.POST, room=room, user=request.user)
         if form.is_valid():
-            booking = form.save()
-            messages.success(request, "Booking request submitted for administrator review.")
-            return redirect("booking:booking_confirmation", pk=booking.pk)
+            try:
+                booking = form.save()
+            except ValidationError as exc:
+                form.add_error(None, exc.messages)
+            else:
+                messages.success(request, "Booking request submitted for administrator review.")
+                return redirect("booking:booking_confirmation", pk=booking.pk)
     else:
         form = BookingForm(room=room, user=request.user, initial={"booking_date": requested_date})
 

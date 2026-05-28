@@ -39,7 +39,13 @@ class Room(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.name)
+            base = slugify(self.name) or "room"
+            candidate = base
+            counter = 2
+            while Room.objects.filter(slug=candidate).exclude(pk=self.pk).exists():
+                candidate = f"{base}-{counter}"
+                counter += 1
+            self.slug = candidate
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):
@@ -119,6 +125,10 @@ class Booking(models.Model):
             errors.setdefault("start_time", "Start time must align with a 30-minute slot.")
         if self.end_time and self.end_time.minute % BOOKING_SLOT_MINUTES != 0:
             errors.setdefault("end_time", "End time must align with a 30-minute slot.")
+
+        if self.booking_date and self.start_time:
+            if self.starts_at() < timezone.localtime():
+                errors.setdefault("start_time", "Booking start time cannot be in the past.")
 
         if errors:
             raise ValidationError(errors)
