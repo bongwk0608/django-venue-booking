@@ -1,6 +1,8 @@
 from datetime import datetime, time, timedelta
+from pathlib import Path
 from unittest.mock import patch
 
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.test import TestCase
@@ -629,3 +631,13 @@ class AdminBookingActionTests(TestCase):
         second.refresh_from_db()
         self.assertEqual(second.status, Booking.Status.PENDING)
         self.assertEqual(response.status_code, 302)
+
+
+class AdminStyleTests(TestCase):
+    def test_reject_button_uses_red_admin_style(self):
+        css = (Path(settings.BASE_DIR) / "static/admin/css/spaceflow.css").read_text()
+        reject_rule = css.split(".sf-btn-reject {", 1)[1].split("}", 1)[0]
+
+        self.assertIn("background: #a23232;", reject_rule)
+        self.assertIn("color: #fff;", reject_rule)
+        self.assertNotIn("background: #2f8b57;", reject_rule)

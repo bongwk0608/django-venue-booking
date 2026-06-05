@@ -631,6 +631,7 @@ select:focus,
 
 .sf-btn-reject {
     background: #a23232;
+    color: #fff;
     box-shadow: 0 6px 14px rgba(162, 50, 50, 0.24);
 }
 
