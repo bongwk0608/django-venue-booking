@@ -455,6 +455,26 @@ class BookingAuthViewTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
 
+    def test_rejected_confirmation_uses_rejected_status_badge(self):
+        booking = Booking.objects.create(
+            user=self.user,
+            room=self.room,
+            full_name="Student",
+            email="student@example.com",
+            booking_date=self.target_date,
+            start_time=time(10, 0),
+            end_time=time(11, 0),
+            purpose="Workshop",
+            status=Booking.Status.REJECTED,
+        )
+        self.client.login(username="student", password="pass12345")
+
+        response = self.client.get(reverse("booking:booking_confirmation", args=[booking.pk]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Status: Rejected")
+        self.assertContains(response, "status-badge-rejected")
+
     def test_user_can_cancel_own_booking(self):
         booking = Booking.objects.create(
             user=self.user,

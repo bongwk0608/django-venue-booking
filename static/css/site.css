@@ -1008,9 +1008,27 @@ textarea {
 .status-badge {
     display: inline-flex;
     margin-top: 8px;
-    color: var(--success);
-    background: rgba(47, 139, 87, 0.08);
-    border-color: rgba(47, 139, 87, 0.16);
+    color: #a85731;
+    background: rgba(255, 226, 215, 0.92);
+    border-color: rgba(168, 87, 49, 0.22);
+}
+
+.status-badge-approved {
+    color: #1f6f45;
+    background: rgba(47, 139, 87, 0.12);
+    border-color: rgba(47, 139, 87, 0.22);
+}
+
+.status-badge-rejected {
+    color: #a23232;
+    background: rgba(255, 233, 233, 0.92);
+    border-color: rgba(162, 50, 50, 0.24);
+}
+
+.status-badge-cancelled {
+    color: #596977;
+    background: rgba(226, 232, 240, 0.9);
+    border-color: rgba(89, 105, 119, 0.22);
 }
 
 .site-footer {
