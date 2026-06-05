@@ -9,3 +9,4 @@ staticfiles/
 .env
 .vscode/
 .DS_Store
+report/
