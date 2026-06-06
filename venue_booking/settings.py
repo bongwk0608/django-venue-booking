@@ -64,6 +64,11 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
+        # Wait up to 20s for the write lock instead of failing immediately with
+        # "database is locked" when a concurrent booking holds it (see Approach A
+        # write-lock serialization in BookingForm.save and the WAL pragma in
+        # booking.apps.BookingConfig.ready).
+        "OPTIONS": {"timeout": 20},
     }
 }
 
