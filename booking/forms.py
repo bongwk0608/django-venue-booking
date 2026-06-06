@@ -5,6 +5,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.db.models import F
 from django.utils import timezone
 
 from .models import (
@@ -115,12 +116,14 @@ class BookingForm(forms.ModelForm):
             instance.email = self._user_email()
         if commit:
             with transaction.atomic():
-                list(
-                    Booking.objects.select_for_update().filter(
-                        room=instance.room,
-                        booking_date=instance.booking_date,
-                    )
-                )
+                # Serialize the overlap check and the insert so two concurrent
+                # requests cannot both pass validation and double-book a slot.
+                # The no-op UPDATE forces SQLite to take its database write lock
+                # immediately (SQLite has no SELECT ... FOR UPDATE), and on
+                # PostgreSQL/MySQL it row-locks the room until this transaction
+                # commits. Either way the check-and-insert becomes a critical
+                # section against other booking writers.
+                Room.objects.filter(pk=instance.room_id).update(name=F("name"))
                 instance.full_clean()
                 instance.save()
         return instance
